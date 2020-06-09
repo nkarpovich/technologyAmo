@@ -1,0 +1,22 @@
+{
+  "name": "TechnologyAmo",
+  "authors": [
+    {
+      "name": "Nikita Karpovich",
+      "email": "obliviousnick@gmail.com"
+    }
+  ],
+  "require": {
+    "pds/skeleton": "@dev"
+  },
+  "require-dev": {
+    "symfony/filesystem": "5.1.0",
+    "symfony/http-client": "5.1.0",
+    "symfony/var-dumper": "5.1.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "TechnoAmo\\": "src/"
+    }
+  }
+}
