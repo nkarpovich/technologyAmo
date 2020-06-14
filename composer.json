@@ -8,7 +8,8 @@
   ],
   "require": {
     "pds/skeleton": "@dev",
-    "amocrm/oauth2-amocrm": "2.0.4"
+    "amocrm/oauth2-amocrm": "2.0.4",
+    "ext-simplexml": "*"
   },
   "require-dev": {
     "symfony/filesystem": "5.1.0",
