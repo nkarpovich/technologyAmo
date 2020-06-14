@@ -7,12 +7,14 @@
     }
   ],
   "require": {
-    "pds/skeleton": "@dev"
+    "pds/skeleton": "@dev",
+    "amocrm/oauth2-amocrm": "2.0.4"
   },
   "require-dev": {
     "symfony/filesystem": "5.1.0",
     "symfony/http-client": "5.1.0",
-    "symfony/var-dumper": "5.1.0"
+    "symfony/var-dumper": "5.1.0",
+    "amocrm/amocrm-api-library": "0.2.3"
   },
   "autoload": {
     "psr-4": {
