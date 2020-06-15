@@ -3,60 +3,144 @@
 
 namespace TechnoAmo;
 
-use AmoCRM\Collections\ContactsCollection;
+use AmoCRM\Client\AmoCRMApiClient;
 use AmoCRM\Collections\CustomFieldsValuesCollection;
-use AmoCRM\Collections\Leads\LeadsCollection;
-use AmoCRM\Collections\LinksCollection;
-use AmoCRM\Collections\NullTagsCollection;
 use AmoCRM\Exceptions\AmoCRMApiException;
-use AmoCRM\Models\CustomFieldsValues\TextCustomFieldValuesModel;
-use AmoCRM\Models\CustomFieldsValues\ValueCollections\NullCustomFieldValueCollection;
-use AmoCRM\Models\CustomFieldsValues\ValueCollections\TextCustomFieldValueCollection;
-use AmoCRM\Models\CustomFieldsValues\ValueModels\TextCustomFieldValueModel;
+use AmoCRM\Models\CustomFieldsValues\ValueModels\MultiselectCustomFieldValueModel;
+use AmoCRM\Models\CustomFieldsValues\MultiSelectCustomFieldValuesModel;
+use AmoCRM\Models\CustomFieldsValues\ValueCollections\MultiSelectCustomFieldValueCollection;
 use AmoCRM\Models\LeadModel;
-use TechnoAmo\Helper;
 
-class Lead
+
+class Lead extends BaseAmoEntity
 {
-    private $leadsService;
+    /**
+     * Название дома
+     */
+    const HOUSE_NAME__CHECKBOX__FIELD_ID = 267695;
+    /**
+     * Тип и размеры
+     */
+    const TYPE_SIZE__CHECKBOX__FIELD_ID = 267787;
+    /**
+     * Комплектация
+     */
+    const KOMPLECT__CHECKBOX__FIELD_ID = 267813;
+    /**
+     * Источник
+     */
+    const RESOURCE__CHECKBOX__FIELD_ID = 520183;
+    /**
+     * Начало строительства
+     */
+    const BUILDING_START__DATE__FIELD_ID = 267815;
+    /**
+     * Окончание строительства
+     */
+    const BUILDING_END__DATE__FIELD_ID = 267827;
+    /**
+     * Теги
+     */
+    const TAGS = ['из 1С'];
 
-    public function __construct(\AmoCRM\EntitiesServices\Leads $leadsService)
+    const FIELD_NAMES = [
+        'ПочтаМенеджера', 'Телефон', 'Имя', 'ДеньРожденияКлиента', 'Бюджет' , 'Предоплата',
+        'ИсточникРекламы', 'ТипДома', 'Размер', 'Комплектация', 'ДатаНачалаМонтажа',
+        'ДатаОкончанияМонтажа', 'АдресМонтажа', 'Эффективность', 'ФормаОплаты',
+        'ВариантОплаты', 'ДатаИВремяВстречи', 'ДоговорКонтрагента', 'ОбъектСтроительства',
+        'НомерВыданнойКартыЛояльности', 'НомерПредъявленнойКартыЛояльности', 'Регион',
+        'Себестоимость', 'GUID', 'ИДАМО'
+    ];
+
+    /**
+     * данные из XML в виде массива
+     * @var array
+     */
+    private $dataFromXml;
+
+    public function __construct(AmoCRMApiClient $apiClient, \SimpleXMLElement $xmlObject)
     {
-        $this->leadsService = $leadsService;
+        parent::__construct($apiClient);
+        //TODO: проверять наличие аттрибута в XML-ке
+        foreach (self::FIELD_NAMES as $FIELD_NAME){
+            $this->dataFromXml[$FIELD_NAME] = Helper::xmlAttributeToString($xmlObject, $FIELD_NAME);
+        }
     }
 
     /**
-     * Создает нового лида из XML документа
-     * @param \SimpleXMLElement $xmlObject
+     * Создать нового лида на основе данных, полученных XML документа
      * @throws AmoCRMApiException
      */
-    public function create(\SimpleXMLElement $xmlObject)
+    public function create()
     {
-        $newLead = new LeadModel();
-        $leadCustomFieldsValues = new CustomFieldsValuesCollection();
-        $textCustomFieldValueModel = new TextCustomFieldValuesModel();
-        $textCustomFieldValueModel->setFieldId(269303);
-        $textCustomFieldValueModel->setValues(
-            (new TextCustomFieldValueCollection())
-                ->add((new TextCustomFieldValueModel())->setValue('Текст'))
-        );
-        $leadCustomFieldsValues->add($textCustomFieldValueModel);
-        $newLead->setCustomFieldsValues($leadCustomFieldsValues);
-        $newLead->setName('Example');
+        $User = new User($this->apiClient);
+        $Contact = new Contact($this->apiClient);
 
-        $leadsCollection = new LeadsCollection();
-        $leadsCollection->add($newLead);
+        //Находим id ответственного менеджера для нового контакта и лида. Менеджер - это сущность User.
+        if ($this->dataFromXml['ПочтаМенеджера'])
+        {
+            $managerId = $User->getIdByLogin($this->dataFromXml['ПочтаМенеджера']);
+        }
+
+        //Находим id клиента по для нового лида. Клиент - это сущность Contact.
+        if ($this->dataFromXml['Телефон'])
+        {
+            $contactId = $Contact->getIdByPhone($this->dataFromXml['Телефон']);
+            if (!$contactId)
+                $contactId = $Contact->create($this->dataFromXml['Телефон'], $this->dataFromXml['Имя'], $this->dataFromXml['ДеньРожденияКлиента']);
+        }
+
+        $newLead = new LeadModel();
+        $newLead->setName('Тестовая сделка - '.$this->dataFromXml['GUID']);
+        $leadCustomFieldsValues = new CustomFieldsValuesCollection();
+        $multiSelectCustomFieldValuesModel = new MultiSelectCustomFieldValuesModel();
+        $multiSelectCustomFieldValuesModel->setFieldId(self::HOUSE_NAME__CHECKBOX__FIELD_ID);
+        $multiSelectCustomFieldValuesModel->setValues(
+            (new MultiSelectCustomFieldValueCollection())
+                ->add((new MultiSelectCustomFieldValueModel())->setEnumId(511229))
+        );
+        $leadCustomFieldsValues->add($multiSelectCustomFieldValuesModel);
+        $newLead->setCustomFieldsValues($leadCustomFieldsValues);
         try
         {
-            $newLead = $this->leadsService->addOne($newLead);
+            $leadsService = $this->apiClient->leads();
+            $newLead = $leadsService->addOne($newLead);
         } catch (AmoCRMApiException $e)
         {
             throw new AmoCRMApiException($e);
         }
+        //Получим контакт по ID, сделку и привяжем контакт к сделке
+        /*try
+        {
+            $contact = $this->apiClient->contacts()->getOne(7143559);
+        } catch (AmoCRMApiException $e)
+        {
+            printError($e);
+            die;
+        }
+
+        $links = new LinksCollection();
+        $links->add($contact);
+        try
+        {
+            $this->apiClient->leads()->link($lead, $links);
+        } catch (AmoCRMApiException $e)
+        {
+            printError($e);
+            die;
+        }*/
     }
 
-    public function update(\SimpleXMLElement $xmlObject, \AmoCRM\Models\LeadModel $lead)
+
+    /**
+     * Обновить лида на основе данных, полученных XML документа
+     */
+    public function update()
     {
+        die();
+        $leadsService = $this->apiClient->leads();
         $this->leadsService->update($lead);
     }
+
+
 }

@@ -59,15 +59,15 @@ catch(\Exception $e)
  * нам придётся перевести ответ в формат, понятный PHP
  */
 $response = json_decode($out, true);
-var_dump($response);
+//var_dump($response);
 $access_token = $response['access_token']; //Access токен
 $refresh_token = $response['refresh_token']; //Refresh токен
 $token_type = $response['token_type']; //Тип токена
 $expires_in = $response['expires_in']; //Через сколько действие токена истекает
 
-/*saveToken([
-    'accessToken' => 'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImp0aSI6IjRjNGY0MTFlYjU5Zjc0NWE1ZWJiNGIzNWMzMjY4OTE1ZjlkNTczYWZlN2IwMTk2YTRjOWM4NGEyNGRkMmViNjQxODFhOGMwZTIxN2Q4ZDUzIn0.eyJhdWQiOiIzNzU2NTczMS1hYmJkLTQ0ZGYtOWNhYy02MDFiOTFjYjkxZmEiLCJqdGkiOiI0YzRmNDExZWI1OWY3NDVhNWViYjRiMzVjMzI2ODkxNWY5ZDU3M2FmZTdiMDE5NmE0YzljODRhMjRkZDJlYjY0MTgxYThjMGUyMTdkOGQ1MyIsImlhdCI6MTU5MjEyNzk1OCwibmJmIjoxNTkyMTI3OTU4LCJleHAiOjE1OTIyMTQzNTgsInN1YiI6IjI4MTYxMTYiLCJhY2NvdW50X2lkIjoyMTk1MzMxNCwic2NvcGVzIjpbInB1c2hfbm90aWZpY2F0aW9ucyIsImNybSIsIm5vdGlmaWNhdGlvbnMiXX0.ruTd-gCs8Er3_ElWVMIkAE1vYIhOLj3TBkduMaH8ArWTiTSJV6L_yYWfty-jp0jQKZKIixslDevqeO_ZHEGVpdDN3F8rE95SVh7aBYASO6e9yza6sXm1CWI_GbAa53qKoP3il51inF7K4PtRIchv543-XyLkIZyqK_EnoFpQQzDJHJtYkdw_p36wogUL8GH5X93zyRdlgXbbUoiz860oHuh2Amzr2yTJYQ15dOTDSk432D9nZennKB4pJDWKPe3lHD4xZ5A065bVxsTN8r3krBF_BrqGAHa6QqiMyaqjJoTNQLC3ZIhk3iQP4N0S_Tsx8YS5rnCv2nOj0-LTI9D5Sw',
-    'refreshToken' => 'def50200bded8881eaf156930433bd180fa6c3ff009b0da91a54cc88b9f4d0c19f38c58aa21a47e8dfe403b73fd7ef9b22a8a7b9905964cfdfcc17d5d8cf1a60e112f6c741a554b1ca02fcc2b52db2eba5398457e0a210b8b2d8c68df35af99d4adbec23a6bddb461c2e1a247720a73adb7d1ca736fd303986deaeaf001656e823ff55abb9beedce42098ab5f2734a0a4232dcfce09a987593a9be1cdfb6d5c8d7b397f1e45a8d8a229678ecfc533aac02593464008c10dc9ff501f8f83f113cd119a220b069bd4baa79b21a486abc8eac4be9e0f3d41263639382843866b1a3eaac0e23f54d22acebde5b94b7e754b50c3daebd92a130e53f3e390db4ca4923d4b0479abb659b7928f66f09aad1b5af82130e07c062196981df68e9902d1c623c6141a217275cd58a622434c683d0794d8d6806398aa81fc9e6af110ba1e77be8194c936a5e5dc7727664e7f48dee0b5ad169d71187830c12aec5a8417180e624d5d2183ab5400a76dada9c507a2b737dcb3a70ceb697ec2ee516c704865d80f8a1c7660256d2beed30899a79a7fe1efc5f853131f9017840e91939ae670251be8e6ebecde09a036959e732de923d480e5245f2',
+saveToken([
+    'accessToken' => $access_token,
+    'refreshToken' => $refresh_token,
     'expires' => '86400',
     'baseDomain' => $apiClient->getAccountBaseDomain(),
-]);*/
+]);

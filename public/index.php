@@ -7,9 +7,9 @@ use TechnoAmo\Helper;
 use TechnoAmo\Lead;
 
 /** Получение токена, обновление токена при необходимости */
+$accessToken = getToken();
 try
 {
-    $accessToken = getToken();
     if ($accessToken->hasExpired())
     {
         /**
@@ -37,8 +37,9 @@ try
 {
     die((string)$e);
 }
-
-$apiClient->setAccessToken($accessToken)
+//\Symfony\Component\VarDumper\VarDumper::dump($accessToken);
+$apiClient->setAccessToken($accessToken);
+/*$apiClient->setAccessToken($accessToken)
     ->setAccountBaseDomain($accessToken->getValues()['baseDomain'])
     ->onAccessTokenRefresh(
         function (AccessTokenInterface $accessToken, string $baseDomain) {
@@ -51,20 +52,19 @@ $apiClient->setAccessToken($accessToken)
                 ]
             );
         }
-    );
+    );*/
 
 //Получаем все файлы лидов, прилетевших из 1С
 $arFiles = Helper::scanDir($pathToXml);
 if ($arFiles)
 {
-    $leadsService = $apiClient->leads();
-    $Lead = new Lead($leadsService);
     foreach ($arFiles as $file)
     {
         $fileName = $pathToXml . $file;
         if (file_exists($fileName))
         {
             $xml = simplexml_load_file($fileName);
+            $Lead = new Lead($apiClient, $xml);
             try
             {
                 if ($leadId = Helper::xmlAttributeToString($xml, 'ИДАМО'))
@@ -90,14 +90,14 @@ if ($arFiles)
                     die('Не указаны обязательные параметры: ID сделки из АМО или GUID из 1С');
                 }
                 //Лид не найден
-                if (!$lead->getId())
+                if ($lead->getId())
                 {
-                    die('Лид не найден');
+                    //                    die('Лид не найден');
                     try
                     {
                         $Lead->create($xml);
-                    }
-                    catch (AmoCRMApiException $e){
+                    } catch (AmoCRMApiException $e)
+                    {
                         printError($e);
                         die;
                     }
@@ -107,9 +107,9 @@ if ($arFiles)
                     die('Лид найден');
                     try
                     {
-                        $Lead->update($xml,$lead);
-                    }
-                    catch (AmoCRMApiException $e){
+                        $Lead->update($xml, $lead);
+                    } catch (AmoCRMApiException $e)
+                    {
                         printError($e);
                         die;
                     }
@@ -130,7 +130,6 @@ else
 {
     die('Нет ни одного XML файла из 1С в директории ' . $pathToXml);
 }
-
 
 /*try
 {
