@@ -1,26 +1,14 @@
 <?php
 
 
-namespace TechnoAmo;
+namespace Karpovich\TechnoAmo;
 
 use AmoCRM\Client\AmoCRMApiClient;
 use AmoCRM\Collections\CustomFieldsValuesCollection;
 use AmoCRM\Collections\LinksCollection;
 use AmoCRM\Exceptions\AmoCRMApiException;
-use AmoCRM\Models\CustomFieldsValues\NumericCustomFieldValuesModel;
-use AmoCRM\Models\CustomFieldsValues\ValueCollections\NumericCustomFieldValueCollection;
-use AmoCRM\Models\CustomFieldsValues\ValueModels\MultiselectCustomFieldValueModel;
-use AmoCRM\Models\CustomFieldsValues\ValueModels\NumericCustomFieldValueModel;
-use AmoCRM\Models\CustomFieldsValues\ValueModels\TextCustomFieldValueModel;
-use AmoCRM\Models\CustomFieldsValues\ValueModels\DateCustomFieldValueModel;
-use AmoCRM\Models\CustomFieldsValues\MultiSelectCustomFieldValuesModel;
-use AmoCRM\Models\CustomFieldsValues\TextCustomFieldValuesModel;
-use AmoCRM\Models\CustomFieldsValues\DateCustomFieldValuesModel;
-use AmoCRM\Models\CustomFieldsValues\ValueCollections\MultiSelectCustomFieldValueCollection;
-use AmoCRM\Models\CustomFieldsValues\ValueCollections\TextCustomFieldValueCollection;
-use AmoCRM\Models\CustomFieldsValues\ValueCollections\DateCustomFieldValueCollection;
 use AmoCRM\Models\LeadModel;
-use Symfony\Component\VarDumper\VarDumper;
+use Karpovich\Helper;
 
 
 class Lead extends BaseAmoEntity
@@ -38,6 +26,14 @@ class Lead extends BaseAmoEntity
      */
     const KOMPLECT__CHECKBOX__FIELD_ID = 267813;
     /**
+     * Форма оплаты
+     */
+    const PAYMENT_FORM__CHECKBOX__FIELD_ID = 267813;
+    /**
+     * Варианты оплаты
+     */
+    const PAYMENT_VARIANT__CHECKBOX__FIELD_ID = 268455;
+    /**
      * Источник
      */
     const RESOURCE__CHECKBOX__FIELD_ID = 520183;
@@ -46,6 +42,22 @@ class Lead extends BaseAmoEntity
      */
     const GUID__TEXT__FIELD_ID = 690570;
     /**
+     * Себетоимость
+     */
+    const INNER_PRICE__TEXT__FIELD_ID = 690772;
+    /**
+     * Предоплата
+     */
+    const PREPAYMENT__TEXT__FIELD_ID = 690772;
+    /**
+     * Эффективность
+     */
+    const EFFICIENCY__TEXT__FIELD_ID = 690774;
+    /**
+     * Дата встречи
+     */
+    const MEETING__DATE__FIELD_ID = 298577;
+    /**
      * Начало строительства
      */
     const BUILDING_START__DATE__FIELD_ID = 267815;
@@ -53,6 +65,10 @@ class Lead extends BaseAmoEntity
      * Окончание строительства
      */
     const BUILDING_END__DATE__FIELD_ID = 267827;
+    /**
+     * Адрес строительства (монтажа)
+     */
+    const BUILDING_ADDRESS__ADDRESS__FIELD_ID = 299749;
     /**
      * Теги
      */
@@ -112,7 +128,12 @@ class Lead extends BaseAmoEntity
         {
             $contactId = $Contact->getIdByPhone($this->dataFromXml['Телефон']);
             if (!$contactId)
-                $contactId = $Contact->create($this->dataFromXml['Телефон'], $this->dataFromXml['Имя'], $this->dataFromXml['ДеньРожденияКлиента']);
+                $contactId = $Contact->create(
+                    $this->dataFromXml['Телефон'],
+                    $this->dataFromXml['Имя'],
+                    $this->dataFromXml['ДеньРожденияКлиента'],
+                    $this->dataFromXml['НомерПредъявленнойКартыЛояльности']
+                );
         }
 
         //Устанавливаем имя лида
@@ -127,8 +148,15 @@ class Lead extends BaseAmoEntity
 
         //Устанавливаем кастомные свойства лида
         $leadCustomFieldsValues = new CustomFieldsValuesCollection();
-        $this->setMultiSelectCustomField($leadCustomFieldsValues, self::HOUSE_NAME__CHECKBOX__FIELD_ID,'',511229);
-        $this->setMultiSelectCustomField($leadCustomFieldsValues, self::KOMPLECT__CHECKBOX__FIELD_ID,'Зима рынок [3]');
+
+        if($this->dataFromXml['ТипДома'])
+        {
+            $this->setMultiSelectCustomField($leadCustomFieldsValues, self::HOUSE_NAME__CHECKBOX__FIELD_ID, $this->dataFromXml['ТипДома']);
+        }
+        if($this->dataFromXml['Комплектация'])
+        {
+            $this->setMultiSelectCustomField($leadCustomFieldsValues, self::KOMPLECT__CHECKBOX__FIELD_ID, $this->dataFromXml['Комплектация']);
+        }
         if($this->dataFromXml['ИсточникРекламы'])
         {
             $this->setMultiSelectCustomField($leadCustomFieldsValues, self::RESOURCE__CHECKBOX__FIELD_ID, $this->dataFromXml['ИсточникРекламы']);
@@ -137,19 +165,62 @@ class Lead extends BaseAmoEntity
         {
             $this->setTextCustomField($leadCustomFieldsValues, self::GUID__TEXT__FIELD_ID, $this->dataFromXml['GUID']);
         }
+        if($this->dataFromXml['Предоплата'])
+        {
+            $this->setCheckboxCustomField($leadCustomFieldsValues, self::PREPAYMENT__TEXT__FIELD_ID, true);
+        }
+       /* if($this->dataFromXml['АдресМонтажа'])
+        {
+            $this->setTextCustomField($leadCustomFieldsValues, self::BUILDING_ADDRESS__ADDRESS__FIELD_ID, $this->dataFromXml['GUID']);
+        }*/
+        if($this->dataFromXml['Эффективность'])
+        {
+            $this->setTextCustomField($leadCustomFieldsValues, self::EFFICIENCY__TEXT__FIELD_ID, $this->dataFromXml['Эффективность']);
+        }
+        if($this->dataFromXml['ФормаОплаты'])
+        {
+            $this->setSelectCustomField($leadCustomFieldsValues, self::PAYMENT_FORM__CHECKBOX__FIELD_ID, $this->dataFromXml['ФормаОплаты']);
+        }
+        if($this->dataFromXml['ВариантОплаты'])
+        {
+            $this->setTextCustomField($leadCustomFieldsValues, self::PAYMENT_VARIANT__CHECKBOX__FIELD_ID, $this->dataFromXml['GUID']);
+        }
+        if($this->dataFromXml['ДоговорКонтрагента'])
+        {
+            $this->setCheckboxCustomField($leadCustomFieldsValues, self::GUID__TEXT__FIELD_ID, true);
+        }
+        /*if($this->dataFromXml['НомерПредъявленнойКартыЛояльности'])
+        {
+            $this->setTextCustomField($leadCustomFieldsValues, self::GUID__TEXT__FIELD_ID, $this->dataFromXml['GUID']);
+        }*/
+        /*if($this->dataFromXml['Регион'])
+        {
+            $this->setTextCustomField($leadCustomFieldsValues, self::GUID__TEXT__FIELD_ID, $this->dataFromXml['GUID']);
+        }*/
+        if($this->dataFromXml['Себестоимость'])
+        {
+            $this->setTextCustomField($leadCustomFieldsValues, self::INNER_PRICE__TEXT__FIELD_ID, $price = preg_replace('/[^0-9]/', '', $this->dataFromXml['Себестоимость']));
+        }
+        if($this->dataFromXml['ДатаИВремяВстречи'])
+        {
+            $dateStart = substr($this->dataFromXml['ДатаИВремяВстречи'],0,10);
+            $datetime = explode(".", $dateStart);
+            $date = mktime(0, 0, 0, $datetime[1], $datetime[0], $datetime[2]);
+            $this->setNumericCustomField($leadCustomFieldsValues, self::MEETING__DATE__FIELD_ID, $date);
+        }
         if($this->dataFromXml['ДатаНачалаМонтажа'])
         {
             $dateStart = substr($this->dataFromXml['ДатаНачалаМонтажа'],0,10);
             $datetime = explode(".", $dateStart);
-            $dateS = mktime(0, 0, 0, $datetime[1], $datetime[0], $datetime[2]);
-            $this->setNumericCustomField($leadCustomFieldsValues, self::BUILDING_START__DATE__FIELD_ID, $dateS);
+            $date = mktime(0, 0, 0, $datetime[1], $datetime[0], $datetime[2]);
+            $this->setNumericCustomField($leadCustomFieldsValues, self::BUILDING_START__DATE__FIELD_ID, $date);
         }
         if($this->dataFromXml['ДатаОкончанияМонтажа'])
         {
             $dateFinish = substr($this->dataFromXml['ДатаОкончанияМонтажа'],0,10);
             $datetime = explode(".", $dateFinish);
-            $dateF = mktime(0, 0, 0, $datetime[1], $datetime[0], $datetime[2]);
-            $this->setNumericCustomField($leadCustomFieldsValues, self::BUILDING_END__DATE__FIELD_ID, $dateF);
+            $date = mktime(0, 0, 0, $datetime[1], $datetime[0], $datetime[2]);
+            $this->setNumericCustomField($leadCustomFieldsValues, self::BUILDING_END__DATE__FIELD_ID, $date);
         }
 
         $newLead->setCustomFieldsValues($leadCustomFieldsValues);
@@ -199,83 +270,6 @@ class Lead extends BaseAmoEntity
         die();
         $leadsService = $this->apiClient->leads();
         $this->leadsService->update($lead);
-    }
-
-    /**
-     * Добавляет значение мультиселекта в коллекцию CustomFieldsValuesCollection
-     * @param CustomFieldsValuesCollection $customFieldsValuesCollection
-     * @param int $fieldId
-     * @param string $value
-     * @param int|null $enumId
-     * @return bool
-     */
-    public function setMultiSelectCustomField(\AmoCRM\Collections\CustomFieldsValuesCollection $customFieldsValuesCollection, int $fieldId, string $value='', int $enumId=null): bool
-    {
-        $multiSelectCustomFieldValuesModel = new MultiSelectCustomFieldValuesModel();
-        $multiSelectCustomFieldValuesModel->setFieldId($fieldId);
-        if($enumId)
-        {
-            $multiSelectCustomFieldValuesModel->setValues(
-                (new MultiSelectCustomFieldValueCollection())
-                    ->add((new MultiSelectCustomFieldValueModel())->setEnumId($enumId))
-            );
-        }elseif($value){
-            $multiSelectCustomFieldValuesModel->setValues(
-                (new MultiSelectCustomFieldValueCollection())
-                    ->add((new MultiSelectCustomFieldValueModel())->setValue($value))
-            );
-        }else{
-            return false;
-        }
-        $customFieldsValuesCollection->add($multiSelectCustomFieldValuesModel);
-        return true;
-    }
-
-    /**
-     * Добавляет текстовое значение в коллекцию CustomFieldsValuesCollection
-     * @param CustomFieldsValuesCollection $customFieldsValuesCollection
-     * @param int $fieldId
-     * @param string $value
-     * @return void
-     */
-    public function setTextCustomField(\AmoCRM\Collections\CustomFieldsValuesCollection $customFieldsValuesCollection, int $fieldId, string $value): void
-    {
-        $textCustomFieldValueModel = new TextCustomFieldValuesModel();
-        $textCustomFieldValueModel->setFieldId($fieldId);
-        $textCustomFieldValueModel->setValues(
-            (new TextCustomFieldValueCollection())
-                ->add((new TextCustomFieldValueModel())->setValue($value))
-        );
-        $customFieldsValuesCollection->add($textCustomFieldValueModel);
-    }
-
-    public function setNumericCustomField(\AmoCRM\Collections\CustomFieldsValuesCollection $customFieldsValuesCollection, int $fieldId, int $value): void
-    {
-        $numericCustomFieldValueModel = new NumericCustomFieldValuesModel();
-        $numericCustomFieldValueModel->setFieldId($fieldId);
-        $numericCustomFieldValueModel->setValues(
-            (new NumericCustomFieldValueCollection())
-                ->add((new NumericCustomFieldValueModel())->setValue($value))
-        );
-        $customFieldsValuesCollection->add($numericCustomFieldValueModel);
-    }
-
-    /**
-     * Добавляет дату в коллекцию CustomFieldsValuesCollection
-     * !!!На 17.06.2020 НЕ работает, AMO ожидает на вход int, а в этом методе параметр приводится к строке вида 'YYY-MM-DD'
-     * @param CustomFieldsValuesCollection $customFieldsValuesCollection
-     * @param int $fieldId
-     * @param string $value
-     */
-    public function setDateCustomField(\AmoCRM\Collections\CustomFieldsValuesCollection $customFieldsValuesCollection, int $fieldId, string $value): void
-    {
-        $dateCustomFieldValuesModel = new DateCustomFieldValuesModel();
-        $dateCustomFieldValuesModel->setFieldId($fieldId);
-        $dateCustomFieldValuesModel->setValues(
-            (new DateCustomFieldValueCollection())
-                ->add((new DateCustomFieldValueModel())->setValue(time()))
-        );
-        $customFieldsValuesCollection->add($dateCustomFieldValuesModel);
     }
 
 }

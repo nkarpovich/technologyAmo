@@ -1,7 +1,7 @@
 <?php
 
 
-namespace TechnoAmo;
+namespace Karpovich;
 
 
 class Helper

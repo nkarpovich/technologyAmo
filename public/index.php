@@ -3,8 +3,8 @@ require_once 'bootstrap.php';
 
 use AmoCRM\Filters\LeadsFilter;
 use AmoCRM\Exceptions\AmoCRMApiException;
-use TechnoAmo\Helper;
-use TechnoAmo\Lead;
+use Karpovich\Helper;
+use Karpovich\TechnoAmo\Lead;
 
 /** Получение токена, обновление токена при необходимости */
 try
@@ -37,7 +37,7 @@ try
         /**
          * Получаем токен по рефрешу
          */
-        try
+      /*  try
         {
             $accessToken = $provider->getAccessToken(new League\OAuth2\Client\Grant\RefreshToken(), [
                 'refresh_token' => $accessToken->getRefreshToken(),
@@ -53,7 +53,7 @@ try
         } catch (Exception $e)
         {
             die((string)$e);
-        }
+        }*/
     }
 } catch (Exception $e)
 {
@@ -62,7 +62,7 @@ try
 $apiClient->setAccessToken($accessToken);
 
 //Получаем все файлы лидов, прилетевших из 1С
-$arFiles = Helper::scanDir($pathToXml);
+$arFiles = \Karpovich\Helper::scanDir($pathToXml);
 if ($arFiles)
 {
     foreach ($arFiles as $file)
@@ -97,9 +97,8 @@ if ($arFiles)
                     die('Не указаны обязательные параметры: ID сделки из АМО или GUID из 1С');
                 }
                 //Лид не найден
-                if ($lead->getId())
+                if (!$lead->getId())
                 {
-                    //                    die('Лид не найден');
                     try
                     {
                         $Lead->create($xml);

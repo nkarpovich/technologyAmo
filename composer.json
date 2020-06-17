@@ -1,5 +1,5 @@
 {
-  "name": "TechnologyAmo",
+  "name": "karpovich/technology-mo",
   "authors": [
     {
       "name": "Nikita Karpovich",
@@ -19,7 +19,8 @@
   },
   "autoload": {
     "psr-4": {
-      "TechnoAmo\\": "src/"
+      "Karpovich\\": "src/Karpovich",
+      "Karpovich\\TechnoAmo\\": "src/Karpovich/TechnoAmo"
     }
   }
 }
