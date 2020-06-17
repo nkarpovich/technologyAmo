@@ -7,7 +7,29 @@ use TechnoAmo\Helper;
 use TechnoAmo\Lead;
 
 /** Получение токена, обновление токена при необходимости */
-$accessToken = getToken();
+try
+{
+    $accessToken = getToken();
+} catch (\Exception $e)
+{
+    try
+    {
+        $accessToken = $apiClient->getOAuthClient()->getAccessTokenByCode($clientAuth);
+        if (!$accessToken->hasExpired())
+        {
+            saveToken([
+                'accessToken' => $accessToken->getToken(),
+                'refreshToken' => $accessToken->getRefreshToken(),
+                'expires' => $accessToken->getExpires(),
+                'baseDomain' => $apiClient->getAccountBaseDomain(),
+            ]);
+        }
+    } catch (Exception $e)
+    {
+        die((string)$e);
+    }
+}
+
 try
 {
     if ($accessToken->hasExpired())
@@ -37,22 +59,7 @@ try
 {
     die((string)$e);
 }
-//\Symfony\Component\VarDumper\VarDumper::dump($accessToken);
 $apiClient->setAccessToken($accessToken);
-/*$apiClient->setAccessToken($accessToken)
-    ->setAccountBaseDomain($accessToken->getValues()['baseDomain'])
-    ->onAccessTokenRefresh(
-        function (AccessTokenInterface $accessToken, string $baseDomain) {
-            saveToken(
-                [
-                    'accessToken' => $accessToken->getToken(),
-                    'refreshToken' => $accessToken->getRefreshToken(),
-                    'expires' => $accessToken->getExpires(),
-                    'baseDomain' => $baseDomain,
-                ]
-            );
-        }
-    );*/
 
 //Получаем все файлы лидов, прилетевших из 1С
 $arFiles = Helper::scanDir($pathToXml);
@@ -124,6 +131,7 @@ if ($arFiles)
         {
             die('Не удалось открыть файл ' . $fileName);
         }
+        exit();
     }
 }
 else

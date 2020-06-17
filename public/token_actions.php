@@ -30,11 +30,12 @@ function saveToken($accessToken)
 
 /**
  * @return AccessToken
+ * @throws Exception
  */
 function getToken()
 {
     if (!file_exists(TOKEN_FILE)) {
-        exit('Access token file not found');
+        throw new Exception('Access token file not found');
     }
 
     $accessToken = json_decode(file_get_contents(TOKEN_FILE), true);
