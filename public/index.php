@@ -61,6 +61,16 @@ try
 }
 $apiClient->setAccessToken($accessToken);
 
+//Ручное тестирование запросов
+/*$request = $apiClient->getRequest();
+try
+{
+    $queryResult = $request->get('/api/v4/leads/unsorted');
+} catch (\AmoCRM\Exceptions\AmoCRMoAuthApiException $e)
+{
+} catch (AmoCRMApiException $e)
+{
+}*/
 //Получаем все файлы лидов, прилетевших из 1С
 $arFiles = \Karpovich\Helper::scanDir($pathToXml);
 if ($arFiles)
@@ -72,23 +82,36 @@ if ($arFiles)
         {
             $xml = simplexml_load_file($fileName);
             $Lead = new Lead($apiClient, $xml);
+            $leadId = Helper::xmlAttributeToString($xml, 'ИДАМО');
+            $leadGUID = Helper::xmlAttributeToString($xml, 'GUID');
             try
             {
-                if ($leadId = Helper::xmlAttributeToString($xml, 'ИДАМО'))
+                if ($leadId)
                 {
+                    echo 'leadId '.$leadId;
                     //Ищем лид по ID
                     $leadId = preg_replace('/[^0-9]/', '', $leadId);
                     $lead = $apiClient->leads()->getOne($leadId);
 
                 }
-                elseif ($leadGUID = Helper::xmlAttributeToString($xml, 'GUID'))
+                elseif ($leadGUID)
                 {
+                    echo 'leadGUID '.$leadGUID;
                     //Ищем лид по GUID
                     $filter = new LeadsFilter();
-                    $filter->setCustomFieldsValues(['1C_GUID' => $leadGUID]);
+                    /*$filter->setCustomFieldsValues()*/
+
+//                    $filter->setCustomFieldsValues([690570 => (string)$leadGUID]);
+                    $filter->setQuery($leadGUID);
+                    $filter->setLimit(1);
+//                    $filter->setIds(27614052);
                     $leadsCollection = $apiClient->leads()->get($filter);
+
                     if (!$leadsCollection->isEmpty())
                     {
+
+                        \Symfony\Component\VarDumper\VarDumper::dump($leadsCollection->toArray());
+                        exit();
                         $lead = $leadsCollection->first();
                     }
                 }
@@ -96,12 +119,13 @@ if ($arFiles)
                 {
                     die('Не указаны обязательные параметры: ID сделки из АМО или GUID из 1С');
                 }
+                $leadId = $lead->getId();
                 //Лид не найден
-                if (!$lead->getId())
+                if (!$leadId)
                 {
                     try
                     {
-                        $Lead->create($xml);
+                        $Lead->create();
                     } catch (AmoCRMApiException $e)
                     {
                         printError($e);
@@ -110,10 +134,11 @@ if ($arFiles)
                 }
                 else
                 {
-                    die('Лид найден');
+                    \Symfony\Component\VarDumper\VarDumper::dump($leadId);
+                    die($leadId);
                     try
                     {
-                        $Lead->update($xml, $lead);
+                        $Lead->update($leadId);
                     } catch (AmoCRMApiException $e)
                     {
                         printError($e);

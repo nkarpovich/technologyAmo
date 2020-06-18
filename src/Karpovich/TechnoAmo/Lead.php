@@ -6,8 +6,11 @@ namespace Karpovich\TechnoAmo;
 use AmoCRM\Client\AmoCRMApiClient;
 use AmoCRM\Collections\CustomFieldsValuesCollection;
 use AmoCRM\Collections\LinksCollection;
+use AmoCRM\Collections\TagsCollection;
 use AmoCRM\Exceptions\AmoCRMApiException;
+use AmoCRM\Helpers\EntityTypesInterface;
 use AmoCRM\Models\LeadModel;
+use AmoCRM\Models\TagModel;
 use Karpovich\Helper;
 
 
@@ -84,10 +87,16 @@ class Lead extends BaseAmoEntity
     ];
 
     /**
-     * данные из XML в виде массива
+     * данные из XML в виде массива. Заполняются при создании объекта класса.
      * @var array
      */
     private $dataFromXml;
+
+    /**
+     * ID Контакта, которого следует привязать к сделке
+     * @var int
+     */
+    private $contactId = 0;
 
     public function __construct(AmoCRMApiClient $apiClient, \SimpleXMLElement $xmlObject)
     {
@@ -105,13 +114,134 @@ class Lead extends BaseAmoEntity
      */
     public function create()
     {
+        echo 'creating';
         $contactId = null;
         $responsibleUserId = null;
         $User = new User($this->apiClient);
         $Contact = new Contact($this->apiClient);
 
         //Создаем новый лид
-        $newLead = new LeadModel();
+        $LeadModel = new LeadModel();
+
+        //Устанавливаем данные для лида
+        $this->setLeadObjectData($LeadModel);
+
+        //Устанавливаем теги для лида
+        $TagsCollection = new TagsCollection();
+        $TagModel = new TagModel();
+        $TagModel->setName('Добавлено из 1С');
+        $TagsCollection->add($TagModel);
+        $TagsService = $this->apiClient->tags(EntityTypesInterface::LEADS);
+        try {
+            $TagsService->add($TagsCollection);
+        } catch (AmoCRMApiException $e) {
+            printError($e);
+            die;
+        }
+        //Добавляем подготовленный лид
+        try
+        {
+            $leadsService = $this->apiClient->leads();
+            $LeadModel = $leadsService->addOne($LeadModel);
+        } catch (AmoCRMApiException $e)
+        {
+            printError($e);
+            die;
+        }
+        
+        //Привязываем контакт к сделке
+        if ($contactId)
+        {
+            $this->attachContactToLead($LeadModel, $contactId);
+        }
+    }
+
+
+    /**
+     * Обновить лида на основе данных, полученных XML документа
+     * @param int $leadId
+     * @throws AmoCRMApiException
+     */
+    public function update(int $leadId)
+    {
+        echo 'updating '.$leadId;
+        //Получим сделку
+        try {
+            $LeadModel = $this->apiClient->leads()->getOne($leadId);
+        } catch (AmoCRMApiException $e) {
+            printError($e);
+            die;
+        }
+
+        $this->setLeadObjectData($LeadModel);
+
+        $TagsCollection = new TagsCollection();
+        $TagModel = new TagModel();
+        $TagModel->setName('Обновлено из 1С');
+        $TagsCollection->add($TagModel);
+        $TagsService = $this->apiClient->tags(EntityTypesInterface::LEADS);
+        try {
+            $TagsService->add($TagsCollection);
+        } catch (AmoCRMApiException $e) {
+            printError($e);
+            die;
+        }
+
+        //Обновляем подготовленный лид
+        try
+        {
+            $this->apiClient->leads()->updateOne($LeadModel);;
+        } catch (AmoCRMApiException $e)
+        {
+            printError($e);
+            die;
+        }
+
+        //Привязываем контакт к сделке
+        if ($this->contactId)
+        {
+            $this->attachContactToLead($LeadModel, $this->contactId);
+        }
+    }
+
+    /**
+     * Привязать контакт к лиду
+     * @param LeadModel $LeadModel
+     * @param int $contactId
+     */
+    public function attachContactToLead(\AmoCRM\Models\LeadModel $LeadModel,int $contactId):void {
+        try
+        {
+            $contact = $this->apiClient->contacts()->getOne($contactId);
+        } catch (AmoCRMApiException $e)
+        {
+            printError($e);
+            die;
+        }
+
+        $links = new LinksCollection();
+        $links->add($contact);
+        try
+        {
+            $this->apiClient->leads()->link($LeadModel, $links);
+        } catch (AmoCRMApiException $e)
+        {
+            printError($e);
+            die;
+        }
+    }
+
+    /**
+     * Наполнить лид данными
+     * @param LeadModel $LeadModel
+     * @throws AmoCRMApiException
+     */
+    public function setLeadObjectData(\AmoCRM\Models\LeadModel $LeadModel){
+        $contactId = null;
+        $responsibleUserId = null;
+        $User = new User($this->apiClient);
+        $Contact = new Contact($this->apiClient);
+
 
         //Находим id ответственного пользователя для нового контакта и лида. Пользователь - это сущность User.
         if ($this->dataFromXml['ПочтаМенеджера'])
@@ -121,14 +251,16 @@ class Lead extends BaseAmoEntity
 
         //Устанавливаем ответственного
         if ($responsibleUserId)
-            $newLead->setResponsibleUserId($responsibleUserId);
+            $LeadModel->setResponsibleUserId($responsibleUserId);
+
+        $LeadModel->setUpdatedAt(time());
 
         //Находим id клиента по номеру телефона для нового лида. Клиент - это сущность Contact.
         if ($this->dataFromXml['Телефон'])
         {
             $contactId = $Contact->getIdByPhone($this->dataFromXml['Телефон']);
             if (!$contactId)
-                $contactId = $Contact->create(
+                $this->contactId = $Contact->create(
                     $this->dataFromXml['Телефон'],
                     $this->dataFromXml['Имя'],
                     $this->dataFromXml['ДеньРожденияКлиента'],
@@ -137,13 +269,13 @@ class Lead extends BaseAmoEntity
         }
 
         //Устанавливаем имя лида
-        $newLead->setName('Тестовая сделка - ' . $this->dataFromXml['GUID']);
+        $LeadModel->setName('Тестовая сделка - ' . $this->dataFromXml['GUID']);
 
         //Устанавливаем стоимость
         if ($this->dataFromXml['Бюджет'])
         {
             $price = preg_replace('/[^0-9]/', '', $this->dataFromXml['Бюджет']);
-            $newLead->setPrice($price);
+            $LeadModel->setPrice($price);
         }
 
         //Устанавливаем кастомные свойства лида
@@ -167,12 +299,12 @@ class Lead extends BaseAmoEntity
         }
         if($this->dataFromXml['Предоплата'])
         {
-            $this->setCheckboxCustomField($leadCustomFieldsValues, self::PREPAYMENT__TEXT__FIELD_ID, true);
+            $this->setCheckboxCustomField($leadCustomFieldsValues, self::PREPAYMENT__TEXT__FIELD_ID);
         }
-       /* if($this->dataFromXml['АдресМонтажа'])
-        {
-            $this->setTextCustomField($leadCustomFieldsValues, self::BUILDING_ADDRESS__ADDRESS__FIELD_ID, $this->dataFromXml['GUID']);
-        }*/
+        /* if($this->dataFromXml['АдресМонтажа'])
+         {
+             $this->setTextCustomField($leadCustomFieldsValues, self::BUILDING_ADDRESS__ADDRESS__FIELD_ID, $this->dataFromXml['GUID']);
+         }*/
         if($this->dataFromXml['Эффективность'])
         {
             $this->setTextCustomField($leadCustomFieldsValues, self::EFFICIENCY__TEXT__FIELD_ID, $this->dataFromXml['Эффективность']);
@@ -187,7 +319,7 @@ class Lead extends BaseAmoEntity
         }
         if($this->dataFromXml['ДоговорКонтрагента'])
         {
-            $this->setCheckboxCustomField($leadCustomFieldsValues, self::GUID__TEXT__FIELD_ID, true);
+            $this->setCheckboxCustomField($leadCustomFieldsValues, self::GUID__TEXT__FIELD_ID);
         }
         /*if($this->dataFromXml['НомерПредъявленнойКартыЛояльности'])
         {
@@ -223,53 +355,6 @@ class Lead extends BaseAmoEntity
             $this->setNumericCustomField($leadCustomFieldsValues, self::BUILDING_END__DATE__FIELD_ID, $date);
         }
 
-        $newLead->setCustomFieldsValues($leadCustomFieldsValues);
-
-        //Добавляем подготовленный лид
-        try
-        {
-            $leadsService = $this->apiClient->leads();
-            $newLead = $leadsService->addOne($newLead);
-        } catch (AmoCRMApiException $e)
-        {
-            printError($e);
-            die;
-        }
-
-        //Привязываем контакт к сделке
-        if ($contactId)
-        {
-            try
-            {
-                $contact = $this->apiClient->contacts()->getOne($contactId);
-            } catch (AmoCRMApiException $e)
-            {
-                printError($e);
-                die;
-            }
-
-            $links = new LinksCollection();
-            $links->add($contact);
-            try
-            {
-                $this->apiClient->leads()->link($newLead, $links);
-            } catch (AmoCRMApiException $e)
-            {
-                printError($e);
-                die;
-            }
-        }
+        $LeadModel->setCustomFieldsValues($leadCustomFieldsValues);
     }
-
-
-    /**
-     * Обновить лида на основе данных, полученных XML документа
-     */
-    public function update()
-    {
-        die();
-        $leadsService = $this->apiClient->leads();
-        $this->leadsService->update($lead);
-    }
-
 }

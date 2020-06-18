@@ -10,13 +10,13 @@ class Helper
      * Возвращает атрибут объекта SimpleXMLElement, приведенный к строке
      * @param \SimpleXMLElement $xmlObject
      * @param string $attribute
-     * @return bool|string
+     * @return null|string
      */
-    public static function xmlAttributeToString(\SimpleXMLElement $xmlObject, string $attribute)
+    public static function xmlAttributeToString(\SimpleXMLElement $xmlObject, string $attribute): ?string
     {
         if (isset($xmlObject[$attribute]))
             return (string)$xmlObject[$attribute];
-        return false;
+        return null;
     }
 
     /**
