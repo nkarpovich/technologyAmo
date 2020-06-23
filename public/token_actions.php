@@ -1,8 +1,8 @@
 <?php
 
 use League\OAuth2\Client\Token\AccessToken;
-define('TOKEN_FILE', DIRECTORY_SEPARATOR . 'tmp' . DIRECTORY_SEPARATOR . 'token_info.json');
 
+define('TOKEN_FILE', __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'token_info.json');
 /**
  * @param array $accessToken
  */
@@ -14,7 +14,8 @@ function saveToken($accessToken)
         && isset($accessToken['refreshToken'])
         && isset($accessToken['expires'])
         && isset($accessToken['baseDomain'])
-    ) {
+    )
+    {
         $data = [
             'accessToken' => $accessToken['accessToken'],
             'expires' => $accessToken['expires'],
@@ -23,7 +24,9 @@ function saveToken($accessToken)
         ];
 
         file_put_contents(TOKEN_FILE, json_encode($data));
-    } else {
+    }
+    else
+    {
         exit('Invalid access token ' . var_export($accessToken, true));
     }
 }
@@ -34,7 +37,8 @@ function saveToken($accessToken)
  */
 function getToken()
 {
-    if (!file_exists(TOKEN_FILE)) {
+    if (!file_exists(TOKEN_FILE))
+    {
         throw new Exception('Access token file not found');
     }
 
@@ -46,14 +50,17 @@ function getToken()
         && isset($accessToken['refreshToken'])
         && isset($accessToken['expires'])
         && isset($accessToken['baseDomain'])
-    ) {
+    )
+    {
         return new AccessToken([
             'access_token' => $accessToken['accessToken'],
             'refresh_token' => $accessToken['refreshToken'],
             'expires' => $accessToken['expires'],
             'baseDomain' => $accessToken['baseDomain'],
         ]);
-    } else {
+    }
+    else
+    {
         exit('Invalid access token ' . var_export($accessToken, true));
     }
 }

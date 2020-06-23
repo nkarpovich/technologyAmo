@@ -82,13 +82,13 @@ if ($arFiles)
         {
             $xml = simplexml_load_file($fileName);
             $Lead = new Lead($apiClient, $xml);
-            $leadId = Helper::xmlAttributeToString($xml, 'ИДАМО');
+            $leadId = Helper::xmlAttributeToString($xml, 'ИДАМО');;
             $leadGUID = Helper::xmlAttributeToString($xml, 'GUID');
             try
             {
                 if ($leadId)
                 {
-                    echo 'leadId '.$leadId;
+//                    echo 'leadId '.$leadId;
                     //Ищем лид по ID
                     $leadId = preg_replace('/[^0-9]/', '', $leadId);
                     $lead = $apiClient->leads()->getOne($leadId);
@@ -96,22 +96,16 @@ if ($arFiles)
                 }
                 elseif ($leadGUID)
                 {
-                    echo 'leadGUID '.$leadGUID;
+//                    echo 'leadGUID '.$leadGUID;
                     //Ищем лид по GUID
                     $filter = new LeadsFilter();
-                    /*$filter->setCustomFieldsValues()*/
-
-//                    $filter->setCustomFieldsValues([690570 => (string)$leadGUID]);
                     $filter->setQuery($leadGUID);
                     $filter->setLimit(1);
-//                    $filter->setIds(27614052);
                     $leadsCollection = $apiClient->leads()->get($filter);
 
                     if (!$leadsCollection->isEmpty())
                     {
-
-                        \Symfony\Component\VarDumper\VarDumper::dump($leadsCollection->toArray());
-                        exit();
+//                        \Symfony\Component\VarDumper\VarDumper::dump($leadsCollection->toArray());
                         $lead = $leadsCollection->first();
                     }
                 }
@@ -134,8 +128,7 @@ if ($arFiles)
                 }
                 else
                 {
-                    \Symfony\Component\VarDumper\VarDumper::dump($leadId);
-                    die($leadId);
+                    //die($leadId);
                     try
                     {
                         $Lead->update($leadId);
@@ -155,7 +148,7 @@ if ($arFiles)
         {
             die('Не удалось открыть файл ' . $fileName);
         }
-        exit();
+//        exit();
     }
 }
 else

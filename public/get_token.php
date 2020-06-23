@@ -1,6 +1,7 @@
 <?php
 include_once __DIR__ . '/bootstrap.php';
-try {
+/*try {
+    echo $clientAuth;
     $accessToken = $apiClient->getOAuthClient()->getAccessTokenByCode($clientAuth);
     if (!$accessToken->hasExpired()) {
         saveToken([
@@ -11,5 +12,11 @@ try {
         ]);
     }
 } catch (Exception $e) {
-    die((string)$e);
+    printError($e);
+//    die((string)$e);
+}*/
+
+$accessToken = getToken();
+if ($accessToken->hasExpired()){
+    echo 'expired';
 }

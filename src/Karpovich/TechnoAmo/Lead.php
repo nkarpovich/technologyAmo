@@ -41,9 +41,17 @@ class Lead extends BaseAmoEntity
      */
     const RESOURCE__CHECKBOX__FIELD_ID = 520183;
     /**
+     * Выставочная площадка
+     */
+    const REGION__CHECKBOX__FIELD_ID = 691100;
+    /**
      * GUID
      */
     const GUID__TEXT__FIELD_ID = 690570;
+    /**
+     * Карта лояльности
+     */
+    const LOYAL_CARD__TEXT__FIELD_ID = 691096;
     /**
      * Себетоимость
      */
@@ -70,8 +78,9 @@ class Lead extends BaseAmoEntity
     const BUILDING_END__DATE__FIELD_ID = 267827;
     /**
      * Адрес строительства (монтажа)
+     * Тип - текст
      */
-    const BUILDING_ADDRESS__ADDRESS__FIELD_ID = 299749;
+    const BUILDING_ADDRESS__TEXT__FIELD_ID = 691098;
     /**
      * Теги
      */
@@ -164,7 +173,7 @@ class Lead extends BaseAmoEntity
      */
     public function update(int $leadId)
     {
-        echo 'updating '.$leadId;
+        echo 'updating '.$leadId.PHP_EOL;
         //Получим сделку
         try {
             $LeadModel = $this->apiClient->leads()->getOne($leadId);
@@ -301,10 +310,10 @@ class Lead extends BaseAmoEntity
         {
             $this->setCheckboxCustomField($leadCustomFieldsValues, self::PREPAYMENT__TEXT__FIELD_ID);
         }
-        /* if($this->dataFromXml['АдресМонтажа'])
+         if($this->dataFromXml['АдресМонтажа'])
          {
-             $this->setTextCustomField($leadCustomFieldsValues, self::BUILDING_ADDRESS__ADDRESS__FIELD_ID, $this->dataFromXml['GUID']);
-         }*/
+             $this->setTextCustomField($leadCustomFieldsValues, self::BUILDING_ADDRESS__TEXT__FIELD_ID, $this->dataFromXml['GUID']);
+         }
         if($this->dataFromXml['Эффективность'])
         {
             $this->setTextCustomField($leadCustomFieldsValues, self::EFFICIENCY__TEXT__FIELD_ID, $this->dataFromXml['Эффективность']);
@@ -321,14 +330,14 @@ class Lead extends BaseAmoEntity
         {
             $this->setCheckboxCustomField($leadCustomFieldsValues, self::GUID__TEXT__FIELD_ID);
         }
-        /*if($this->dataFromXml['НомерПредъявленнойКартыЛояльности'])
+        if($this->dataFromXml['НомерПредъявленнойКартыЛояльности'])
         {
-            $this->setTextCustomField($leadCustomFieldsValues, self::GUID__TEXT__FIELD_ID, $this->dataFromXml['GUID']);
-        }*/
-        /*if($this->dataFromXml['Регион'])
+            $this->setTextCustomField($leadCustomFieldsValues, self::LOYAL_CARD__TEXT__FIELD_ID, $this->dataFromXml['НомерПредъявленнойКартыЛояльности']);
+        }
+        if($this->dataFromXml['Регион'])
         {
-            $this->setTextCustomField($leadCustomFieldsValues, self::GUID__TEXT__FIELD_ID, $this->dataFromXml['GUID']);
-        }*/
+            $this->setTextCustomField($leadCustomFieldsValues, self::REGION__CHECKBOX__FIELD_ID, $this->dataFromXml['Регион']);
+        }
         if($this->dataFromXml['Себестоимость'])
         {
             $this->setTextCustomField($leadCustomFieldsValues, self::INNER_PRICE__TEXT__FIELD_ID, $price = preg_replace('/[^0-9]/', '', $this->dataFromXml['Себестоимость']));
