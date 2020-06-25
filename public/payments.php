@@ -61,29 +61,18 @@ try
 }
 $apiClient->setAccessToken($accessToken);
 
-//Ручное тестирование запросов
-/*$request = $apiClient->getRequest();
-try
-{
-    $queryResult = $request->get('/api/v4/leads/unsorted');
-} catch (\AmoCRM\Exceptions\AmoCRMoAuthApiException $e)
-{
-} catch (AmoCRMApiException $e)
-{
-}*/
-
-//Получаем все файлы лидов, прилетевших из 1С
-$arFiles = \Karpovich\Helper::scanDir($pathToLeadsXml);
+//Получаем все файлы оплат, прилетевших из 1С
+$arFiles = \Karpovich\Helper::scanDir($pathToPaymentsXml);
 if ($arFiles)
 {
     foreach ($arFiles as $file)
     {
-        $fileName = $pathToLeadsXml . $file;
+        $fileName = $pathToPaymentsXml . $file;
         if (file_exists($fileName))
         {
             $xml = simplexml_load_file($fileName);
             $Lead = new Lead($apiClient, $xml);
-            $leadId = Helper::xmlAttributeToString($xml, 'ИДАМО');;
+            $leadId = Helper::xmlAttributeToString($xml, 'IDAMO');;
             $leadGUID = Helper::xmlAttributeToString($xml, 'GUID');
             try
             {
@@ -116,21 +105,14 @@ if ($arFiles)
                 //Лид не найден
                 if (!$leadId)
                 {
-                    try
-                    {
-                        $Lead->create();
-                    } catch (AmoCRMApiException $e)
-                    {
-                        printError($e);
-                        die;
-                    }
+                   die('Лид не найден');
                 }
                 else
                 {
                     //die($leadId);
                     try
                     {
-                        $Lead->update($leadId);
+                        $Lead->updatePayment($leadId,$xml);
                     } catch (AmoCRMApiException $e)
                     {
                         printError($e);
@@ -151,5 +133,5 @@ if ($arFiles)
 }
 else
 {
-    die('Нет ни одного XML файла из 1С в директории ' . $pathToLeadsXml);
+    die('Нет ни одного XML файла из 1С в директории ' . $pathToPaymentsXml);
 }
