@@ -100,24 +100,37 @@ if ($arFiles)
                     $filter = new LeadsFilter();
                     $filter->setQuery($leadGUID);
                     $filter->setLimit(1);
-                    $leadsCollection = $apiClient->leads()->get($filter);
-
-                    if (!$leadsCollection->isEmpty())
+                    try
                     {
-//                        \Symfony\Component\VarDumper\VarDumper::dump($leadsCollection->toArray());
-                        $lead = $leadsCollection->first();
+                        $leadsCollection = $apiClient->leads()->get($filter);
+                        if (!$leadsCollection->isEmpty())
+                        {
+                            //                        \Symfony\Component\VarDumper\VarDumper::dump($leadsCollection->toArray());
+                            $lead = $leadsCollection->first();
+                        }
+                        $leadId = $lead->getId();
+                    }catch (AmoCRMApiException $e)
+                    {
+                        if($e->getCode() != '204')
+                        {
+                            printError($e);
+                            die;
+                        }else{
+                            $leadId = false;
+                        }
                     }
                 }
                 else
                 {
                     die('Не указаны обязательные параметры: ID сделки из АМО или GUID из 1С');
                 }
-                $leadId = $lead->getId();
+
                 //Лид не найден
                 if (!$leadId)
                 {
                     try
                     {
+                        echo 'creating new Lead GUID '.$leadGUID.PHP_EOL;
                         $Lead->create();
                     } catch (AmoCRMApiException $e)
                     {
@@ -127,7 +140,6 @@ if ($arFiles)
                 }
                 else
                 {
-                    //die($leadId);
                     try
                     {
                         $Lead->update($leadId);

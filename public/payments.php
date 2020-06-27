@@ -37,23 +37,23 @@ try
         /**
          * Получаем токен по рефрешу
          */
-      /*  try
-        {
-            $accessToken = $provider->getAccessToken(new League\OAuth2\Client\Grant\RefreshToken(), [
-                'refresh_token' => $accessToken->getRefreshToken(),
-            ]);
+        /*  try
+          {
+              $accessToken = $provider->getAccessToken(new League\OAuth2\Client\Grant\RefreshToken(), [
+                  'refresh_token' => $accessToken->getRefreshToken(),
+              ]);
 
-            saveToken([
-                'accessToken' => $accessToken->getToken(),
-                'refreshToken' => $accessToken->getRefreshToken(),
-                'expires' => $accessToken->getExpires(),
-                'baseDomain' => $provider->getBaseDomain(),
-            ]);
+              saveToken([
+                  'accessToken' => $accessToken->getToken(),
+                  'refreshToken' => $accessToken->getRefreshToken(),
+                  'expires' => $accessToken->getExpires(),
+                  'baseDomain' => $provider->getBaseDomain(),
+              ]);
 
-        } catch (Exception $e)
-        {
-            die((string)$e);
-        }*/
+          } catch (Exception $e)
+          {
+              die((string)$e);
+          }*/
     }
 } catch (Exception $e)
 {
@@ -71,58 +71,62 @@ if ($arFiles)
         if (file_exists($fileName))
         {
             $xml = simplexml_load_file($fileName);
-            $Lead = new Lead($apiClient, $xml);
-            $leadId = Helper::xmlAttributeToString($xml, 'IDAMO');;
-            $leadGUID = Helper::xmlAttributeToString($xml, 'GUID');
-            try
+            foreach ($xml->children() as $xmlPaymentElement)
             {
-                if ($leadId)
+//                var_dump($xmlPaymentElement);
+                $Lead = new Lead($apiClient, $xmlPaymentElement);
+                $leadId = Helper::xmlAttributeToString($xmlPaymentElement, 'IDAMO');;
+                $leadGUID = Helper::xmlAttributeToString($xmlPaymentElement, 'GUID');
+                try
                 {
-                    //Ищем лид по ID
-                    $leadId = preg_replace('/[^0-9]/', '', $leadId);
-                    $lead = $apiClient->leads()->getOne($leadId);
+                    if ($leadId)
+                    {
+                        //Ищем лид по ID
+                        $leadId = preg_replace('/[^0-9]/', '', $leadId);
+                        $lead = $apiClient->leads()->getOne($leadId);
 
-                }
-                elseif ($leadGUID)
-                {
-                    //Ищем лид по GUID
-                    $filter = new LeadsFilter();
-                    $filter->setQuery($leadGUID);
-                    $filter->setLimit(1);
-                    $leadsCollection = $apiClient->leads()->get($filter);
+                    }
+                    elseif ($leadGUID)
+                    {
+                        //Ищем лид по GUID
+                        $filter = new LeadsFilter();
+                        $filter->setQuery($leadGUID);
+                        $filter->setLimit(1);
+                        $leadsCollection = $apiClient->leads()->get($filter);
 
-                    if (!$leadsCollection->isEmpty())
-                    {
-//                        \Symfony\Component\VarDumper\VarDumper::dump($leadsCollection->toArray());
-                        $lead = $leadsCollection->first();
+                        if (!$leadsCollection->isEmpty())
+                        {
+                            //                        \Symfony\Component\VarDumper\VarDumper::dump($leadsCollection->toArray());
+                            $lead = $leadsCollection->first();
+                        }
                     }
-                }
-                else
-                {
-                    die('Не указаны обязательные параметры: ID сделки из АМО или GUID из 1С');
-                }
-                $leadId = $lead->getId();
-                //Лид не найден
-                if (!$leadId)
-                {
-                   die('Лид не найден');
-                }
-                else
-                {
-                    //die($leadId);
-                    try
+                    else
                     {
-                        $Lead->updatePayment($leadId,$xml);
-                    } catch (AmoCRMApiException $e)
-                    {
-                        printError($e);
-                        die;
+                        die('Не указаны обязательные параметры: ID сделки из АМО или GUID из 1С');
                     }
+                    $leadId = $lead->getId();
+                    //Лид не найден
+                    if (!$leadId)
+                    {
+                        die('Лид не найден');
+                    }
+                    else
+                    {
+                        //die($leadId);
+                        try
+                        {
+                            $Lead->updatePayment($leadId, $xmlPaymentElement);
+                        } catch (AmoCRMApiException $e)
+                        {
+                            printError($e);
+                            die;
+                        }
+                    }
+                } catch (AmoCRMApiException $e)
+                {
+                    printError($e);
+                    die;
                 }
-            } catch (AmoCRMApiException $e)
-            {
-                printError($e);
-                die;
             }
         }
         else

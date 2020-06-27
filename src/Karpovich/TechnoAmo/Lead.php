@@ -10,6 +10,12 @@ use AmoCRM\Collections\TagsCollection;
 use AmoCRM\Exceptions\AmoCRMApiException;
 use AmoCRM\Exceptions\InvalidArgumentException;
 use AmoCRM\Helpers\EntityTypesInterface;
+use AmoCRM\Models\CustomFieldsValues\BaseCustomFieldValuesModel;
+use AmoCRM\Models\CustomFieldsValues\NumericCustomFieldValuesModel;
+use AmoCRM\Models\CustomFieldsValues\TextCustomFieldValuesModel;
+use AmoCRM\Models\CustomFieldsValues\ValueCollections\NumericCustomFieldValueCollection;
+use AmoCRM\Models\CustomFieldsValues\ValueCollections\TextCustomFieldValueCollection;
+use AmoCRM\Models\CustomFieldsValues\ValueModels\NumericCustomFieldValueModel;
 use AmoCRM\Models\LeadModel;
 use AmoCRM\Models\TagModel;
 use Karpovich\Helper;
@@ -17,6 +23,33 @@ use Karpovich\Helper;
 
 class Lead extends BaseAmoEntity
 {
+    /**
+     * ID полей дат платежей
+     */
+    const PAYMENT_DATES__DATE__FIELDS_ID = [
+        1=>501317,
+        2=>501323,
+        3=>501331,
+        4=>501345,
+        5=>551185,
+        6=>580943,
+        7=>580947,
+        8=>651719,
+    ];
+    /**
+     * ID полей платежей
+     */
+    const PAYMENT__NUMERIC__FIELDS_ID = [
+        1=>489715,
+        2=>489717,
+        3=>489729,
+        4=>489787,
+        5=>551183,
+        6=>580941,
+        7=>580945,
+        8=>651717,
+    ];
+
     /**
      *
      */
@@ -128,11 +161,9 @@ class Lead extends BaseAmoEntity
      */
     public function create()
     {
-        echo 'creating';
+        echo 'creating in process...'.PHP_EOL;
         $contactId = null;
         $responsibleUserId = null;
-        $User = new User($this->apiClient);
-        $Contact = new Contact($this->apiClient);
 
         //Создаем новый лид
         $LeadModel = new LeadModel();
@@ -170,6 +201,7 @@ class Lead extends BaseAmoEntity
         {
             $this->attachContactToLead($LeadModel, $contactId);
         }
+        echo 'creation completed'.PHP_EOL;
     }
 
 
@@ -419,67 +451,63 @@ class Lead extends BaseAmoEntity
     public function setLeadObjectDataPayment(\AmoCRM\Models\LeadModel $LeadModel)
     {
         //Флаг, есть ли оплаты у лида
-        $hasPayments = false;
+        $hasPayments = true;
 
         //Номер последней оплаты в АМО. Если он не пустой, то нужно записать следующую за ним оплату.
         $numOfLastPayment = null;
 
         //Получаем кастомные свойства лида, смотрим есть ли оплаты
-        $customFields = $LeadModel->getCustomFieldsValues();
-        for ($i = 0; $i < 8; $i++)
+        $leadCustomFieldsValues = $LeadModel->getCustomFieldsValues();
+        for ($i = 1; $i <= 8; $i++)
         {
-            $num = $i === 0 ? '' : $i;
-//            $dateFieldName = 'Дата платежа ' . $num;
-            $amountFieldName = 'Платеж ' . $num;
-            $amoutValue = $customFields->getBy('name', $amountFieldName)->getValues();
-            if(!empty($amoutValue)){
-                $hasPayments = true;
-                $numOfLastPayment = $i;
+            $amountFieldId = self::PAYMENT__NUMERIC__FIELDS_ID[$i];
+            $dateFieldId = self::PAYMENT_DATES__DATE__FIELDS_ID[$i];
+            $amountField = $leadCustomFieldsValues->getBy('fieldId', $amountFieldId);
+            if (!empty($amountField)) {
+                //Поле платежа уже заполнено у лида, переходим к следующему полю платежа
+                continue;
+            } else {
+                //Если на первом шаге у лида не заполнен платеж - значит платежей еще не было
+                if($i===1)
+                    $hasPayments = false;
+
+                //Первое найденное незаполненное поле платежа у лида. Заполняем значениями.
+                if ($this->dataFromXml['Summa'])
+                {
+                    $numericCustomFieldValueModel = new NumericCustomFieldValuesModel();
+                    $numericCustomFieldValueModel->setFieldId($amountFieldId);
+                    $numericCustomFieldValueModel->setValues(
+                        (new numericCustomFieldValueCollection())
+                            ->add((new numericCustomFieldValueModel())->setValue(preg_replace('/[^0-9]/', '', $this->dataFromXml['Summa'])))
+                    );
+                    $leadCustomFieldsValues->add($numericCustomFieldValueModel);
+                }
+                if ($this->dataFromXml['DataPlatezha'])
+                {
+                    $payDate = substr($this->dataFromXml['DataPlatezha'], 0, 10);
+                    $datetime = explode(".", $payDate);
+                    $date = mktime(0, 0, 0, $datetime[1], $datetime[0], $datetime[2]);
+                    $numericCustomFieldValueModel = new NumericCustomFieldValuesModel();
+                    $numericCustomFieldValueModel->setFieldId($dateFieldId);
+                    $numericCustomFieldValueModel->setValues(
+                        (new numericCustomFieldValueCollection())
+                            ->add((new numericCustomFieldValueModel())->setValue($date))
+                    );
+                    $leadCustomFieldsValues->add($numericCustomFieldValueModel);
+                }
+                break;
             }
         }
-        if ($hasPayments)
-        {
-            $amountField = $customFields->getBy('name', 'Платеж '.($numOfLastPayment+1));
-            $dateField = $customFields->getBy('name', 'Дата платежа '.($numOfLastPayment+1));
-        }
-        else
+        if (!$hasPayments)
         {
             //Оплат еще не было - переводим в статус 'Внесена предоплата'
             $LeadModel->setStatusId(self::PREPAYMENT_STATUS);
-            $LeadModel->setPipelineId(self::PREPAYMENT_STATUS);
-            $amountField = $customFields->getBy('name', 'Платеж 1');
-            $dateField = $customFields->getBy('name', 'Дата платежа 1');
-        }
-
-        //Установим значение полей платежа
-        if ($this->dataFromXml['Summa'])
-        {
-            $amountField->setValues(
-                (new TextCustomFieldValueCollection())
-                    ->add(
-                        (new TextCustomFieldValueModel())
-                            ->setValue(preg_replace('/[^0-9]/', '', $this->dataFromXml['Summa']))
-                    )
-            );
-        }
-        if ($this->dataFromXml['DataPlatezha'])
-        {
-            $payDate = substr($this->dataFromXml['DataPlatezha'], 0, 10);
-            $datetime = explode(".", $payDate);
-            $date = mktime(0, 0, 0, $datetime[1], $datetime[0], $datetime[2]);
-            $dateField->setValues(
-                (new TextCustomFieldValueCollection())
-                    ->add(
-                        (new TextCustomFieldValueModel())
-                            ->setValue($date)
-                    )
-            );
         }
 
         //Установим время апдейта
         $LeadModel->setUpdatedAt(time());
 
         //Сохраняем кастомные свойства у лида
-        $LeadModel->setCustomFieldsValues($customFields);
+        $LeadModel->setCustomFieldsValues($leadCustomFieldsValues);
     }
 }
