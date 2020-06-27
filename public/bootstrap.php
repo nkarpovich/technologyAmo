@@ -15,6 +15,8 @@ $clientAuth = $_ENV['CLIENT_AUTH'];
 $accountBaseDomain = $_ENV['CLIENT_BASE_DOMAIN'];
 $pathToLeadsXml = __DIR__.'/../resources/leads/';
 $pathToPaymentsXml = __DIR__.'/../resources/payments/';
+$pathToOldLeadsXml = __DIR__.'/../resources/old_leads/';
+$pathToOldPaymentsXml = __DIR__.'/../resources/old_payments/';
 
 $apiClient = new AmoCRMApiClient($clientId, $clientSecret, $redirectUri);
 $apiClient->setAccountBaseDomain($accountBaseDomain);

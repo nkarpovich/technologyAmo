@@ -3,8 +3,12 @@ require_once 'bootstrap.php';
 
 use AmoCRM\Filters\LeadsFilter;
 use AmoCRM\Exceptions\AmoCRMApiException;
+use Symfony\Component\Filesystem\Exception\IOExceptionInterface;
+use Symfony\Component\Filesystem\Filesystem;
 use Karpovich\Helper;
 use Karpovich\TechnoAmo\Lead;
+
+$filesystem = new Filesystem();
 
 /** Получение токена, обновление токена при необходимости */
 try
@@ -73,7 +77,6 @@ if ($arFiles)
             $xml = simplexml_load_file($fileName);
             foreach ($xml->children() as $xmlPaymentElement)
             {
-//                var_dump($xmlPaymentElement);
                 $Lead = new Lead($apiClient, $xmlPaymentElement);
                 $leadId = Helper::xmlAttributeToString($xmlPaymentElement, 'IDAMO');;
                 $leadGUID = Helper::xmlAttributeToString($xmlPaymentElement, 'GUID');
@@ -96,7 +99,6 @@ if ($arFiles)
 
                         if (!$leadsCollection->isEmpty())
                         {
-                            //                        \Symfony\Component\VarDumper\VarDumper::dump($leadsCollection->toArray());
                             $lead = $leadsCollection->first();
                         }
                     }
@@ -105,16 +107,16 @@ if ($arFiles)
                         die('Не указаны обязательные параметры: ID сделки из АМО или GUID из 1С');
                     }
                     $leadId = $lead->getId();
-                    //Лид не найден
+
                     if (!$leadId)
                     {
                         die('Лид не найден');
                     }
                     else
                     {
-                        //die($leadId);
                         try
                         {
+                            echo 'updating Lead ID '.$leadId.'...'.PHP_EOL;
                             $Lead->updatePayment($leadId, $xmlPaymentElement);
                         } catch (AmoCRMApiException $e)
                         {
@@ -127,11 +129,19 @@ if ($arFiles)
                     printError($e);
                     die;
                 }
+                echo 'success'.PHP_EOL;
             }
         }
         else
         {
             die('Не удалось открыть файл ' . $fileName);
+        }
+        try
+        {
+            $filesystem->rename($fileName, $pathToOldPaymentsXml . $file);
+        } catch (IOExceptionInterface $exception)
+        {
+            echo "An error occurred while renaming your file at " . $exception->getPath();
         }
     }
 }

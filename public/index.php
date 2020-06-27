@@ -61,17 +61,6 @@ try
 }
 $apiClient->setAccessToken($accessToken);
 
-//Ручное тестирование запросов
-/*$request = $apiClient->getRequest();
-try
-{
-    $queryResult = $request->get('/api/v4/leads/unsorted');
-} catch (\AmoCRM\Exceptions\AmoCRMoAuthApiException $e)
-{
-} catch (AmoCRMApiException $e)
-{
-}*/
-
 //Получаем все файлы лидов, прилетевших из 1С
 $arFiles = \Karpovich\Helper::scanDir($pathToLeadsXml);
 if ($arFiles)
@@ -159,6 +148,7 @@ if ($arFiles)
         {
             die('Не удалось открыть файл ' . $fileName);
         }
+        echo 'success'.PHP_EOL;
     }
 }
 else

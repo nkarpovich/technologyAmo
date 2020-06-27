@@ -261,7 +261,6 @@ class Lead extends BaseAmoEntity
      * @param int $leadId
      * @throws InvalidArgumentException
      */
-    //!!! TODO - переделать обход XML, там не 1 элемент корневой
     public function updatePayment(int $leadId)
     {
         //Получим сделку
