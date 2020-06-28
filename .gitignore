@@ -3,4 +3,5 @@ vendor/
 resources/
 *.log
 public/test.php
-config/.prod.env
+config/.prod.en
+config/token_info.json
