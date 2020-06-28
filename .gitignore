@@ -3,3 +3,4 @@ vendor/
 resources/
 *.log
 public/test.php
+config/.prod.env
