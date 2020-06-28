@@ -12,11 +12,12 @@ $clientId = $_ENV['CLIENT_ID'];
 $clientSecret = $_ENV['CLIENT_SECRET'];
 $redirectUri = $_ENV['CLIENT_REDIRECT_URI'];
 $clientAuth = $_ENV['CLIENT_AUTH'];
+$baseDir = $_ENV['BASE_DIR'];
 $accountBaseDomain = $_ENV['CLIENT_BASE_DOMAIN'];
-$pathToLeadsXml = __DIR__.'/../resources/leads/';
-$pathToPaymentsXml = __DIR__.'/../resources/payments/';
-$pathToOldLeadsXml = __DIR__.'/../resources/old_leads/';
-$pathToOldPaymentsXml = __DIR__.'/../resources/old_payments/';
+$pathToLeadsXml = $baseDir.$_ENV['PATH_TO_LEADS_DIR'];
+$pathToPaymentsXml = $baseDir.$_ENV['PATH_TO_PAYMENTS_DIR'];
+$pathToOldLeadsXml = $baseDir.$_ENV['PATH_TO_OLD_LEADS_DIR'];
+$pathToOldPaymentsXml = $baseDir.$_ENV['PATH_TO_OLD_PAYMENTS_DIR'];
 
 $apiClient = new AmoCRMApiClient($clientId, $clientSecret, $redirectUri);
 $apiClient->setAccountBaseDomain($accountBaseDomain);
