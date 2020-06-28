@@ -55,7 +55,7 @@ try
     die((string)$e);
 }
 $apiClient->setAccessToken($accessToken);
-
+echo 'Start '.date('d.m.Y H:i:s').PHP_EOL;
 //Получаем все файлы лидов, прилетевших из 1С
 $arFiles = \Karpovich\Helper::scanDir($pathToLeadsXml);
 if ($arFiles)

@@ -61,6 +61,7 @@ try
 $apiClient->setAccessToken($accessToken);
 
 //Получаем все файлы оплат, прилетевших из 1С
+echo 'Start '.date('d.m.Y H:i:s').PHP_EOL;
 $arFiles = \Karpovich\Helper::scanDir($pathToPaymentsXml);
 if ($arFiles)
 {
