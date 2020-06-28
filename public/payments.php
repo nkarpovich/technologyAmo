@@ -5,10 +5,16 @@ use AmoCRM\Filters\LeadsFilter;
 use AmoCRM\Exceptions\AmoCRMApiException;
 use Symfony\Component\Filesystem\Exception\IOExceptionInterface;
 use Symfony\Component\Filesystem\Filesystem;
+use Monolog\Logger;
+use Monolog\Handler\StreamHandler;
 use Karpovich\Helper;
 use Karpovich\TechnoAmo\Lead;
 
 $filesystem = new Filesystem();
+
+// create a log channel
+$log = new Logger('payments');
+$log->pushHandler(new StreamHandler(__DIR__.'/../logs/payments.log', Logger::INFO));
 
 /** Получение токена, обновление токена при необходимости */
 try
@@ -30,6 +36,7 @@ try
         }
     } catch (Exception $e)
     {
+        $log->error((string)$e);
         die((string)$e);
     }
 }
@@ -51,17 +58,19 @@ try
 
         } catch (Exception $e)
         {
+            $log->error((string)$e);
             die((string)$e);
         }
     }
 } catch (Exception $e)
 {
+    $log->error((string)$e);
     die((string)$e);
 }
 $apiClient->setAccessToken($accessToken);
 
 //Получаем все файлы оплат, прилетевших из 1С
-echo 'Start '.date('d.m.Y H:i:s').PHP_EOL;
+$log->info('Start '.date('d.m.Y H:i:s').PHP_EOL);
 $arFiles = \Karpovich\Helper::scanDir($pathToPaymentsXml);
 if ($arFiles)
 {
@@ -100,36 +109,41 @@ if ($arFiles)
                     }
                     else
                     {
+                        $log->error('Не указаны обязательные параметры: ID сделки из АМО или GUID из 1С');
                         die('Не указаны обязательные параметры: ID сделки из АМО или GUID из 1С');
                     }
                     $leadId = $lead->getId();
 
                     if (!$leadId)
                     {
+                        $log->info('Лид не найден');
                         die('Лид не найден');
                     }
                     else
                     {
                         try
                         {
-                            echo 'updating Lead ID ' . $leadId . '...' . PHP_EOL;
+                            $log->info('updating Lead ID ' . $leadId . '...' . PHP_EOL);
                             $Lead->updatePayment($leadId, $xmlPaymentElement);
                         } catch (AmoCRMApiException $e)
                         {
+                            $log->error($e->getMessage());
                             printError($e);
                             die;
                         }
                     }
                 } catch (AmoCRMApiException $e)
                 {
+                    $log->error($e->getMessage());
                     printError($e);
                     die;
                 }
-                echo 'success' . PHP_EOL;
+                $log->info('success' . PHP_EOL);
             }
         }
         else
         {
+            $log->error('Не удалось открыть файл ' . $fileName);
             die('Не удалось открыть файл ' . $fileName);
         }
         try
@@ -137,11 +151,13 @@ if ($arFiles)
             $filesystem->rename($fileName, $pathToOldPaymentsXml . $file);
         } catch (IOExceptionInterface $exception)
         {
+            $log->error("An error occurred while renaming your file at " . $exception->getPath());
             echo "An error occurred while renaming your file at " . $exception->getPath();
         }
     }
 }
 else
 {
+    $log->error('Нет ни одного XML файла из 1С в директории ' . $pathToPaymentsXml);
     die('Нет ни одного XML файла из 1С в директории ' . $pathToPaymentsXml);
 }

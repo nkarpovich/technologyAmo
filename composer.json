@@ -8,14 +8,17 @@
   ],
   "require": {
     "pds/skeleton": "@dev",
+    "symfony/filesystem": "5.1.0",
+    "amocrm/amocrm-api-library": "0.2.3",
     "amocrm/oauth2-amocrm": "2.0.4",
+    "monolog/monolog": "2.1.0",
     "ext-simplexml": "*"
   },
   "require-dev": {
     "symfony/filesystem": "5.1.0",
-    "symfony/http-client": "5.1.0",
     "symfony/var-dumper": "5.1.0",
-    "amocrm/amocrm-api-library": "0.2.3"
+    "amocrm/amocrm-api-library": "0.2.3",
+    "ext-simplexml": "*"
   },
   "autoload": {
     "psr-4": {
