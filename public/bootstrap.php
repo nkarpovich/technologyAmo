@@ -7,7 +7,7 @@ include_once __DIR__ . '/../vendor/autoload.php';
 
 $dotenv = new Dotenv();
 if (file_exists(__DIR__ . '/../config/.prod.env'))
-    $dotenv->load(__DIR__ . '/../config/.prod..env');
+    $dotenv->load(__DIR__ . '/../config/.prod.env');
 else
     $dotenv->load(__DIR__ . '/../config/.env');
 
