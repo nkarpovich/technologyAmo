@@ -38,26 +38,21 @@ try
 {
     if ($accessToken->hasExpired())
     {
-        /**
-         * Получаем токен по рефрешу
-         */
-        /*  try
-          {
-              $accessToken = $provider->getAccessToken(new League\OAuth2\Client\Grant\RefreshToken(), [
-                  'refresh_token' => $accessToken->getRefreshToken(),
-              ]);
+        try
+        {
+            $accessToken = $apiClient->getOAuthClient()->getAccessTokenByRefreshToken($accessToken);
 
-              saveToken([
-                  'accessToken' => $accessToken->getToken(),
-                  'refreshToken' => $accessToken->getRefreshToken(),
-                  'expires' => $accessToken->getExpires(),
-                  'baseDomain' => $provider->getBaseDomain(),
-              ]);
+            saveToken([
+                'accessToken' => $accessToken->getToken(),
+                'refreshToken' => $accessToken->getRefreshToken(),
+                'expires' => $accessToken->getExpires(),
+                'baseDomain' => $apiClient->getAccountBaseDomain()
+            ]);
 
-          } catch (Exception $e)
-          {
-              die((string)$e);
-          }*/
+        } catch (Exception $e)
+        {
+            die((string)$e);
+        }
     }
 } catch (Exception $e)
 {
@@ -116,7 +111,7 @@ if ($arFiles)
                     {
                         try
                         {
-                            echo 'updating Lead ID '.$leadId.'...'.PHP_EOL;
+                            echo 'updating Lead ID ' . $leadId . '...' . PHP_EOL;
                             $Lead->updatePayment($leadId, $xmlPaymentElement);
                         } catch (AmoCRMApiException $e)
                         {
@@ -129,7 +124,7 @@ if ($arFiles)
                     printError($e);
                     die;
                 }
-                echo 'success'.PHP_EOL;
+                echo 'success' . PHP_EOL;
             }
         }
         else

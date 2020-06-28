@@ -34,26 +34,21 @@ try
 {
     if ($accessToken->hasExpired())
     {
-        /**
-         * Получаем токен по рефрешу
-         */
-      /*  try
+        try
         {
-            $accessToken = $provider->getAccessToken(new League\OAuth2\Client\Grant\RefreshToken(), [
-                'refresh_token' => $accessToken->getRefreshToken(),
-            ]);
+            $accessToken = $apiClient->getOAuthClient()->getAccessTokenByRefreshToken($accessToken);
 
             saveToken([
                 'accessToken' => $accessToken->getToken(),
                 'refreshToken' => $accessToken->getRefreshToken(),
                 'expires' => $accessToken->getExpires(),
-                'baseDomain' => $provider->getBaseDomain(),
+                'baseDomain' => $apiClient->getAccountBaseDomain()
             ]);
 
         } catch (Exception $e)
         {
             die((string)$e);
-        }*/
+        }
     }
 } catch (Exception $e)
 {
