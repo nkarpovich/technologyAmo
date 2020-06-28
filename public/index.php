@@ -3,8 +3,14 @@ require_once 'bootstrap.php';
 
 use AmoCRM\Filters\LeadsFilter;
 use AmoCRM\Exceptions\AmoCRMApiException;
+use Monolog\Logger;
+use Monolog\Handler\StreamHandler;
 use Karpovich\Helper;
 use Karpovich\TechnoAmo\Lead;
+
+// create a log channel
+$log = new Logger('payments');
+$log->pushHandler(new StreamHandler(__DIR__.'/../logs/payments.log', Logger::INFO));
 
 /** Получение токена, обновление токена при необходимости */
 try
@@ -26,6 +32,7 @@ try
         }
     } catch (Exception $e)
     {
+        $log->error((string)$e);
         die((string)$e);
     }
 }
@@ -47,15 +54,17 @@ try
 
         } catch (Exception $e)
         {
+            $log->error((string)$e);
             die((string)$e);
         }
     }
 } catch (Exception $e)
 {
+    $log->error((string)$e);
     die((string)$e);
 }
 $apiClient->setAccessToken($accessToken);
-echo 'Start '.date('d.m.Y H:i:s').PHP_EOL;
+$log->info('Start '.date('d.m.Y H:i:s').PHP_EOL);
 //Получаем все файлы лидов, прилетевших из 1С
 $arFiles = \Karpovich\Helper::scanDir($pathToLeadsXml);
 if ($arFiles)
@@ -97,6 +106,7 @@ if ($arFiles)
                     {
                         if($e->getCode() != '204')
                         {
+                            $log->error($e->getMessage());
                             printError($e);
                             die;
                         }else{
@@ -106,6 +116,7 @@ if ($arFiles)
                 }
                 else
                 {
+                    $log->error('Не указаны обязательные параметры: ID сделки из АМО или GUID из 1С');
                     die('Не указаны обязательные параметры: ID сделки из АМО или GUID из 1С');
                 }
 
@@ -118,6 +129,7 @@ if ($arFiles)
                         $Lead->create();
                     } catch (AmoCRMApiException $e)
                     {
+                        $log->error($e->getMessage());
                         printError($e);
                         die;
                     }
@@ -129,24 +141,28 @@ if ($arFiles)
                         $Lead->update($leadId);
                     } catch (AmoCRMApiException $e)
                     {
+                        $log->error($e->getMessage());
                         printError($e);
                         die;
                     }
                 }
             } catch (AmoCRMApiException $e)
             {
+                $log->error($e->getMessage());
                 printError($e);
                 die;
             }
         }
         else
         {
-            die('Не удалось открыть файл ' . $fileName);
+            $log->error('Не удалось открыть файл ' . $fileName);
         }
+        $log->info('success'.PHP_EOL);
         echo 'success'.PHP_EOL;
     }
 }
 else
 {
+    $log->error('Нет ни одного XML файла из 1С в директории ' . $pathToLeadsXml);
     die('Нет ни одного XML файла из 1С в директории ' . $pathToLeadsXml);
 }
