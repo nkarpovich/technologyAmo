@@ -164,7 +164,6 @@ class Lead extends BaseAmoEntity
     public function create()
     {
         echo 'creating in process...'.PHP_EOL;
-        $contactId = null;
         $responsibleUserId = null;
 
         //Создаем новый лид
@@ -199,9 +198,9 @@ class Lead extends BaseAmoEntity
         }
 
         //Привязываем контакт к сделке
-        if ($contactId)
+        if ($this->contactId)
         {
-            $this->attachContactToLead($LeadModel, $contactId);
+            $this->attachContactToLead($LeadModel, $this->contactId);
         }
         echo 'creation completed'.PHP_EOL;
     }
@@ -323,7 +322,6 @@ class Lead extends BaseAmoEntity
      */
     public function setLeadObjectData(\AmoCRM\Models\LeadModel $LeadModel)
     {
-        $contactId = null;
         $responsibleUserId = null;
         $User = new User($this->apiClient);
         $Contact = new Contact($this->apiClient);
@@ -344,8 +342,8 @@ class Lead extends BaseAmoEntity
         //Находим id клиента по номеру телефона для нового лида. Клиент - это сущность Contact.
         if ($this->dataFromXml['Телефон'])
         {
-            $contactId = $Contact->getIdByPhone($this->dataFromXml['Телефон']);
-            if (!$contactId)
+            $this->contactId = $Contact->getIdByPhone($this->dataFromXml['Телефон']);
+            if (!$this->contactId)
                 $this->contactId = $Contact->create(
                     $this->dataFromXml['Телефон'],
                     $this->dataFromXml['Имя'],
