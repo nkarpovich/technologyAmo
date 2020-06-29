@@ -460,16 +460,18 @@ class Lead extends BaseAmoEntity
 
         //Хак - в Amo URL хранятся с пробельными символами, если в таком же виде отправить назад - будет ошибка. Заменяем пробелы на соответствующий символ %20
         $doc1Field = $leadCustomFieldsValues->getBy('fieldId', 513439);
-        $doc1FieldValues = $doc1Field->getValues();
-        $doc1FieldValue = $doc1FieldValues->first();
-        VarDumper::dump($doc1FieldValue);
-        $doc1Field->setValues(
-            (new TextCustomFieldValueCollection())
-                ->add(
-                    (new TextCustomFieldValueModel())
-                        ->setValue(str_replace(' ','%20',$doc1FieldValue->value))
-                )
-        );
+        if($doc1Field)
+        {
+            $doc1FieldValues = $doc1Field->getValues();
+            $doc1FieldValue = $doc1FieldValues->first();
+            $doc1Field->setValues(
+                (new TextCustomFieldValueCollection())
+                    ->add(
+                        (new TextCustomFieldValueModel())
+                            ->setValue(str_replace(' ', '%20', $doc1FieldValue->value))
+                    )
+            );
+        }
 
         //смотрим есть ли оплаты
         for ($i = 1; $i <= 8; $i++)

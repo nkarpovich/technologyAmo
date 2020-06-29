@@ -24,6 +24,13 @@ use AmoCRM\Models\CustomFieldsValues\ValueModels\NumericCustomFieldValueModel;
 use AmoCRM\Models\CustomFieldsValues\ValueModels\SelectCustomFieldValueModel;
 use AmoCRM\Models\CustomFieldsValues\ValueModels\TextCustomFieldValueModel;
 
+
+/**
+ * Базовый класс для всех сущностей АМО
+ * В основном содержит методы для наполнения полей сущности значениями
+ * Class BaseAmoEntity
+ * @package Karpovich\TechnoAmo
+ */
 class BaseAmoEntity
 {
     /**

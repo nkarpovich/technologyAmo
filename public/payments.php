@@ -9,6 +9,7 @@ use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
 use Karpovich\Helper;
 use Karpovich\TechnoAmo\Lead;
+use Karpovich\TechnoAmo\Token;
 
 $filesystem = new Filesystem();
 
@@ -16,58 +17,7 @@ $filesystem = new Filesystem();
 $log = new Logger('payments');
 $log->pushHandler(new StreamHandler(__DIR__.'/../logs/payments.log', Logger::INFO));
 
-/** Получение токена, обновление токена при необходимости */
-try
-{
-    $accessToken = getToken();
-} catch (\Exception $e)
-{
-    try
-    {
-        $accessToken = $apiClient->getOAuthClient()->getAccessTokenByCode($clientAuth);
-        if (!$accessToken->hasExpired())
-        {
-            saveToken([
-                'accessToken' => $accessToken->getToken(),
-                'refreshToken' => $accessToken->getRefreshToken(),
-                'expires' => $accessToken->getExpires(),
-                'baseDomain' => $apiClient->getAccountBaseDomain(),
-            ]);
-        }
-    } catch (Exception $e)
-    {
-        $log->error((string)$e);
-        die((string)$e);
-    }
-}
-
-try
-{
-    if ($accessToken->hasExpired())
-    {
-        try
-        {
-            $accessToken = $apiClient->getOAuthClient()->getAccessTokenByRefreshToken($accessToken);
-
-            saveToken([
-                'accessToken' => $accessToken->getToken(),
-                'refreshToken' => $accessToken->getRefreshToken(),
-                'expires' => $accessToken->getExpires(),
-                'baseDomain' => $apiClient->getAccountBaseDomain()
-            ]);
-
-        } catch (Exception $e)
-        {
-            $log->error((string)$e);
-            die((string)$e);
-        }
-    }
-} catch (Exception $e)
-{
-    $log->error((string)$e);
-    die((string)$e);
-}
-$apiClient->setAccessToken($accessToken);
+Token::setAccessToken($apiClient,$clientAuth,$log);
 
 //Получаем все файлы оплат, прилетевших из 1С
 $log->info('Start '.date('d.m.Y H:i:s').PHP_EOL);
@@ -155,6 +105,8 @@ if ($arFiles)
             echo "An error occurred while renaming your file at " . $exception->getPath();
         }
     }
+    $log->info('success'.PHP_EOL);
+    echo 'success'.PHP_EOL;
 }
 else
 {

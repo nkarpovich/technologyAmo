@@ -9,65 +9,16 @@ use Symfony\Component\Filesystem\Exception\IOExceptionInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Karpovich\Helper;
 use Karpovich\TechnoAmo\Lead;
+use Karpovich\TechnoAmo\Token;
 
 $filesystem = new Filesystem();
 
 // create a log channel
-$log = new Logger('payments');
-$log->pushHandler(new StreamHandler(__DIR__.'/../logs/payments.log', Logger::INFO));
+$log = new Logger('leads');
+$log->pushHandler(new StreamHandler(__DIR__.'/../logs/leads.log', Logger::INFO));
 
-/** Получение токена, обновление токена при необходимости */
-try
-{
-    $accessToken = getToken();
-} catch (\Exception $e)
-{
-    try
-    {
-        $accessToken = $apiClient->getOAuthClient()->getAccessTokenByCode($clientAuth);
-        if (!$accessToken->hasExpired())
-        {
-            saveToken([
-                'accessToken' => $accessToken->getToken(),
-                'refreshToken' => $accessToken->getRefreshToken(),
-                'expires' => $accessToken->getExpires(),
-                'baseDomain' => $apiClient->getAccountBaseDomain(),
-            ]);
-        }
-    } catch (Exception $e)
-    {
-        $log->error((string)$e);
-        die((string)$e);
-    }
-}
+Token::setAccessToken($apiClient,$clientAuth,$log);
 
-try
-{
-    if ($accessToken->hasExpired())
-    {
-        try
-        {
-            $accessToken = $apiClient->getOAuthClient()->getAccessTokenByRefreshToken($accessToken);
-
-            saveToken([
-                'accessToken' => $accessToken->getToken(),
-                'refreshToken' => $accessToken->getRefreshToken(),
-                'expires' => $accessToken->getExpires(),
-                'baseDomain' => $apiClient->getAccountBaseDomain()
-            ]);
-
-        } catch (Exception $e)
-        {
-            $log->error((string)$e);
-            die((string)$e);
-        }
-    }
-} catch (Exception $e)
-{
-    $log->error((string)$e);
-    die((string)$e);
-}
-$apiClient->setAccessToken($accessToken);
 $log->info('Start '.date('d.m.Y H:i:s').PHP_EOL);
 //Получаем все файлы лидов, прилетевших из 1С
 $arFiles = \Karpovich\Helper::scanDir($pathToLeadsXml);
