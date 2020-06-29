@@ -5,8 +5,12 @@ use AmoCRM\Filters\LeadsFilter;
 use AmoCRM\Exceptions\AmoCRMApiException;
 use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
+use Symfony\Component\Filesystem\Exception\IOExceptionInterface;
+use Symfony\Component\Filesystem\Filesystem;
 use Karpovich\Helper;
 use Karpovich\TechnoAmo\Lead;
+
+$filesystem = new Filesystem();
 
 // create a log channel
 $log = new Logger('payments');
@@ -157,6 +161,14 @@ if ($arFiles)
         else
         {
             $log->error('Не удалось открыть файл ' . $fileName);
+        }
+        try
+        {
+            $filesystem->rename($fileName, $pathToOldLeadsXml . $file);
+        } catch (IOExceptionInterface $exception)
+        {
+            $log->error("An error occurred while renaming your file at " . $exception->getPath());
+            echo "An error occurred while renaming your file at " . $exception->getPath();
         }
         $log->info('success'.PHP_EOL);
         echo 'success'.PHP_EOL;
