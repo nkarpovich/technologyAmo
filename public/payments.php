@@ -92,7 +92,6 @@ if ($arFiles)
                         //Ищем лид по ID
                         $leadId = preg_replace('/[^0-9]/', '', $leadId);
                         $lead = $apiClient->leads()->getOne($leadId);
-
                     }
                     elseif ($leadGUID)
                     {
@@ -112,6 +111,7 @@ if ($arFiles)
                         $log->error('Не указаны обязательные параметры: ID сделки из АМО или GUID из 1С');
                         die('Не указаны обязательные параметры: ID сделки из АМО или GUID из 1С');
                     }
+
                     $leadId = $lead->getId();
 
                     if (!$leadId)

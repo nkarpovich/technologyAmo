@@ -125,6 +125,7 @@ if ($arFiles)
                 {
                     try
                     {
+                        $log->info('creating new Lead GUID '.$leadGUID.PHP_EOL);
                         echo 'creating new Lead GUID '.$leadGUID.PHP_EOL;
                         $Lead->create();
                     } catch (AmoCRMApiException $e)

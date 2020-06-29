@@ -16,9 +16,11 @@ use AmoCRM\Models\CustomFieldsValues\TextCustomFieldValuesModel;
 use AmoCRM\Models\CustomFieldsValues\ValueCollections\NumericCustomFieldValueCollection;
 use AmoCRM\Models\CustomFieldsValues\ValueCollections\TextCustomFieldValueCollection;
 use AmoCRM\Models\CustomFieldsValues\ValueModels\NumericCustomFieldValueModel;
+use AmoCRM\Models\CustomFieldsValues\ValueModels\TextCustomFieldValueModel;
 use AmoCRM\Models\LeadModel;
 use AmoCRM\Models\TagModel;
 use Karpovich\Helper;
+use Symfony\Component\VarDumper\VarDumper;
 
 
 class Lead extends BaseAmoEntity
@@ -281,7 +283,7 @@ class Lead extends BaseAmoEntity
             $this->apiClient->leads()->updateOne($LeadModel);
         } catch (AmoCRMApiException $e)
         {
-            printError($e);
+            echo $e->getMessage();
             die;
         }
     }
@@ -455,8 +457,23 @@ class Lead extends BaseAmoEntity
         //Номер последней оплаты в АМО. Если он не пустой, то нужно записать следующую за ним оплату.
         $numOfLastPayment = null;
 
-        //Получаем кастомные свойства лида, смотрим есть ли оплаты
+        //Получаем кастомные свойства лида
         $leadCustomFieldsValues = $LeadModel->getCustomFieldsValues();
+
+        //Хак - в Amo URL хранятся с пробельными символами, если в таком же виде отправить назад - будет ошибка. Заменяем пробелы на соответствующий символ %20
+        $doc1Field = $leadCustomFieldsValues->getBy('fieldId', 513439);
+        $doc1FieldValues = $doc1Field->getValues();
+        $doc1FieldValue = $doc1FieldValues->first();
+        VarDumper::dump($doc1FieldValue);
+        $doc1Field->setValues(
+            (new TextCustomFieldValueCollection())
+                ->add(
+                    (new TextCustomFieldValueModel())
+                        ->setValue(str_replace(' ','%20',$doc1FieldValue->value))
+                )
+        );
+
+        //смотрим есть ли оплаты
         for ($i = 1; $i <= 8; $i++)
         {
             $amountFieldId = self::PAYMENT__NUMERIC__FIELDS_ID[$i];
