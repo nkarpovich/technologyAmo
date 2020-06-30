@@ -23,6 +23,6 @@ $pathToPaymentsXml = $baseDir . $_ENV['PATH_TO_PAYMENTS_DIR'];
 $pathToOldLeadsXml = $baseDir . $_ENV['PATH_TO_OLD_LEADS_DIR'];
 $pathToOldPaymentsXml = $baseDir . $_ENV['PATH_TO_OLD_PAYMENTS_DIR'];
 $pathToExportedLeadsFile = $baseDir . $_ENV['PATH_TO_EXPORTED_LEADS_FROM_AMO'];
-
+$pathToTokenFile = $baseDir.'/config/token_info.json';
 $apiClient = new AmoCRMApiClient($clientId, $clientSecret, $redirectUri);
 $apiClient->setAccountBaseDomain($accountBaseDomain);

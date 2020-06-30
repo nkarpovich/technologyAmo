@@ -17,7 +17,7 @@ $filesystem = new Filesystem();
 $log = new Logger('leads');
 $log->pushHandler(new StreamHandler(__DIR__ . '/../logs/getLeadsFromAmo.log', Logger::INFO));
 
-Token::setAccessToken($apiClient, $clientAuth, $log);
+Token::setAccessToken($apiClient, $clientAuth, $log, $pathToTokenFile);
 
 $log->info('Start ' . date('d.m.Y H:i:s') . PHP_EOL);
 

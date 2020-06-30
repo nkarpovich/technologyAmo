@@ -15,24 +15,28 @@ use Monolog\Logger;
  */
 class Token
 {
-    const TOKEN_FILE = __DIR__ . DIRECTORY_SEPARATOR . '..' .
-    DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'token_info.json';
 
-    public static function setAccessToken(AmoCRMApiClient $apiClient, string $clientAuth, Logger $log)
-    {
+    public static function setAccessToken(
+        AmoCRMApiClient $apiClient,
+        string $clientAuth,
+        Logger $log,
+        string $pathToTokenFile
+    ) {
         /** Получение токена, обновление токена при необходимости */
         try {
-            $accessToken = self::getToken();
+            $accessToken = self::getToken($pathToTokenFile);
         } catch (Exception $e) {
             try {
                 $accessToken = $apiClient->getOAuthClient()->getAccessTokenByCode($clientAuth);
                 if (!$accessToken->hasExpired()) {
-                    self::saveToken([
-                        'accessToken' => $accessToken->getToken(),
+                    self::saveToken(
+                        $pathToTokenFile,
+                        ['accessToken' => $accessToken->getToken(),
                         'refreshToken' => $accessToken->getRefreshToken(),
                         'expires' => $accessToken->getExpires(),
                         'baseDomain' => $apiClient->getAccountBaseDomain(),
-                    ]);
+                        ]
+                    );
                 }
             } catch (Exception $e) {
                 $log->error((string)$e);
@@ -45,12 +49,15 @@ class Token
                 try {
                     $accessToken = $apiClient->getOAuthClient()->getAccessTokenByRefreshToken($accessToken);
 
-                    self::saveToken([
+                    self::saveToken(
+                        $pathToTokenFile,
+                        [
                         'accessToken' => $accessToken->getToken(),
                         'refreshToken' => $accessToken->getRefreshToken(),
                         'expires' => $accessToken->getExpires(),
                         'baseDomain' => $apiClient->getAccountBaseDomain()
-                    ]);
+                        ]
+                    );
                 } catch (Exception $e) {
                     $log->error((string)$e);
                     die((string)$e);
@@ -64,9 +71,10 @@ class Token
     }
 
     /**
+     * @param $pathToTokenFile
      * @param array $accessToken
      */
-    public static function saveToken($accessToken)
+    public static function saveToken(string $pathToTokenFile, array $accessToken)
     {
         if (isset($accessToken)
             && isset($accessToken['accessToken'])
@@ -81,23 +89,24 @@ class Token
                 'baseDomain' => $accessToken['baseDomain'],
             ];
 
-            file_put_contents(self::TOKEN_FILE, json_encode($data));
+            file_put_contents($pathToTokenFile, json_encode($data));
         } else {
             exit('Invalid access token ' . var_export($accessToken, true));
         }
     }
 
     /**
+     * @param $pathToTokenFile
      * @return AccessToken
      * @throws Exception
      */
-    public static function getToken()
+    public static function getToken($pathToTokenFile)
     {
-        if (!file_exists(self::TOKEN_FILE)) {
+        if (!file_exists($pathToTokenFile)) {
             throw new Exception('Access token file not found');
         }
 
-        $accessToken = json_decode(file_get_contents(self::TOKEN_FILE), true);
+        $accessToken = json_decode(file_get_contents($pathToTokenFile), true);
 
         if (isset($accessToken)
             && isset($accessToken['accessToken'])
