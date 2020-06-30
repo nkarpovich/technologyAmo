@@ -22,7 +22,7 @@ class Token
     {
         /** Получение токена, обновление токена при необходимости */
         try {
-            $accessToken = getToken();
+            $accessToken = self::getToken();
         } catch (Exception $e) {
             try {
                 $accessToken = $apiClient->getOAuthClient()->getAccessTokenByCode($clientAuth);
