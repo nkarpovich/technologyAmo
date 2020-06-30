@@ -3,12 +3,12 @@
 
 namespace Karpovich\TechnoAmo;
 
-
+use AmoCRM\Client\AmoCRMApiClient;
 use AmoCRM\Exceptions\AmoCRMApiException;
 
 class User extends BaseAmoEntity
 {
-    public function __construct(\AmoCRM\Client\AmoCRMApiClient $apiClient)
+    public function __construct(AmoCRMApiClient $apiClient)
     {
         parent::__construct($apiClient);
     }
@@ -27,13 +27,13 @@ class User extends BaseAmoEntity
             $usersCollection = $usersService->get();
             $arUsers = $usersCollection->toArray();
         } catch (AmoCRMApiException $e) {
-            printError($e);
+            ErrorPrinter::printError($e);
             die;
         }
-        foreach ($arUsers as $arUser)
-        {
-            if($arUser['email'] === $userLogin)
+        foreach ($arUsers as $arUser) {
+            if ($arUser['email'] === $userLogin) {
                 $userId = $arUser['id'];
+            }
         }
         return $userId;
     }

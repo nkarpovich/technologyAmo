@@ -3,19 +3,21 @@
 
 namespace Karpovich;
 
+use SimpleXMLElement;
 
 class Helper
 {
     /**
      * Возвращает атрибут объекта SimpleXMLElement, приведенный к строке
-     * @param \SimpleXMLElement $xmlObject
+     * @param SimpleXMLElement $xmlObject
      * @param string $attribute
      * @return null|string
      */
-    public static function xmlAttributeToString(\SimpleXMLElement $xmlObject, string $attribute): ?string
+    public static function xmlAttributeToString(SimpleXMLElement $xmlObject, string $attribute): ?string
     {
-        if (isset($xmlObject[$attribute]))
+        if (isset($xmlObject[$attribute])) {
             return (string)$xmlObject[$attribute];
+        }
         return null;
     }
 
@@ -30,11 +32,16 @@ class Helper
         $list = scandir($dir, $sort);
 
         // если директории не существует
-        if (!$list) return false;
+        if (!$list) {
+            return false;
+        }
 
         // удаляем . и ..
-        if ($sort == 0) unset($list[0], $list[1]);
-        else unset($list[count($list) - 1], $list[count($list) - 1]);
+        if ($sort == 0) {
+            unset($list[0], $list[1]);
+        } else {
+            unset($list[count($list) - 1], $list[count($list) - 1]);
+        }
         return $list;
     }
 }

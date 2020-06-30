@@ -8,11 +8,8 @@ use AmoCRM\Collections\CustomFieldsValuesCollection;
 use AmoCRM\Collections\LinksCollection;
 use AmoCRM\Collections\TagsCollection;
 use AmoCRM\Exceptions\AmoCRMApiException;
-use AmoCRM\Exceptions\InvalidArgumentException;
 use AmoCRM\Helpers\EntityTypesInterface;
-use AmoCRM\Models\CustomFieldsValues\BaseCustomFieldValuesModel;
 use AmoCRM\Models\CustomFieldsValues\NumericCustomFieldValuesModel;
-use AmoCRM\Models\CustomFieldsValues\TextCustomFieldValuesModel;
 use AmoCRM\Models\CustomFieldsValues\ValueCollections\NumericCustomFieldValueCollection;
 use AmoCRM\Models\CustomFieldsValues\ValueCollections\TextCustomFieldValueCollection;
 use AmoCRM\Models\CustomFieldsValues\ValueModels\NumericCustomFieldValueModel;
@@ -20,8 +17,7 @@ use AmoCRM\Models\CustomFieldsValues\ValueModels\TextCustomFieldValueModel;
 use AmoCRM\Models\LeadModel;
 use AmoCRM\Models\TagModel;
 use Karpovich\Helper;
-use Symfony\Component\VarDumper\VarDumper;
-
+use SimpleXMLElement;
 
 class Lead extends BaseAmoEntity
 {
@@ -29,27 +25,27 @@ class Lead extends BaseAmoEntity
      * ID полей дат платежей
      */
     const PAYMENT_DATES__DATE__FIELDS_ID = [
-        1=>501317,
-        2=>501323,
-        3=>501331,
-        4=>501345,
-        5=>551185,
-        6=>580943,
-        7=>580947,
-        8=>651719,
+        1 => 501317,
+        2 => 501323,
+        3 => 501331,
+        4 => 501345,
+        5 => 551185,
+        6 => 580943,
+        7 => 580947,
+        8 => 651719,
     ];
     /**
      * ID полей платежей
      */
     const PAYMENT__NUMERIC__FIELDS_ID = [
-        1=>489715,
-        2=>489717,
-        3=>489729,
-        4=>489787,
-        5=>551183,
-        6=>580941,
-        7=>580945,
-        8=>651717,
+        1 => 489715,
+        2 => 489717,
+        3 => 489729,
+        4 => 489787,
+        5 => 551183,
+        6 => 580941,
+        7 => 580945,
+        8 => 651717,
     ];
 
     /**
@@ -122,10 +118,6 @@ class Lead extends BaseAmoEntity
      * Тип - текст
      */
     const BUILDING_ADDRESS__TEXT__FIELD_ID = 691098;
-    /**
-     * Теги
-     */
-    const TAGS = ['из 1С'];
 
     const FIELD_NAMES = [
         'ПочтаМенеджера', 'Телефон', 'Имя', 'ДеньРожденияКлиента', 'Бюджет', 'Предоплата',
@@ -148,11 +140,10 @@ class Lead extends BaseAmoEntity
      */
     private $contactId = 0;
 
-    public function __construct(AmoCRMApiClient $apiClient, \SimpleXMLElement $xmlObject)
+    public function __construct(AmoCRMApiClient $apiClient, SimpleXMLElement $xmlObject)
     {
         parent::__construct($apiClient);
-        foreach (self::FIELD_NAMES as $FIELD_NAME)
-        {
+        foreach (self::FIELD_NAMES as $FIELD_NAME) {
             $this->dataFromXml[$FIELD_NAME] = Helper::xmlAttributeToString($xmlObject, $FIELD_NAME);
         }
     }
@@ -163,7 +154,7 @@ class Lead extends BaseAmoEntity
      */
     public function create()
     {
-        echo 'creating in process...'.PHP_EOL;
+        echo 'creating in process...' . PHP_EOL;
         $responsibleUserId = null;
 
         //Создаем новый лид
@@ -178,31 +169,26 @@ class Lead extends BaseAmoEntity
         $TagModel->setName('Добавлено из 1С');
         $TagsCollection->add($TagModel);
         $TagsService = $this->apiClient->tags(EntityTypesInterface::LEADS);
-        try
-        {
+        try {
             $TagsService->add($TagsCollection);
-        } catch (AmoCRMApiException $e)
-        {
-            printError($e);
+        } catch (AmoCRMApiException $e) {
+            ErrorPrinter::printError($e);
             die;
         }
         //Добавляем подготовленный лид
-        try
-        {
+        try {
             $leadsService = $this->apiClient->leads();
             $LeadModel = $leadsService->addOne($LeadModel);
-        } catch (AmoCRMApiException $e)
-        {
-            printError($e);
+        } catch (AmoCRMApiException $e) {
+            ErrorPrinter::printError($e);
             die;
         }
 
         //Привязываем контакт к сделке
-        if ($this->contactId)
-        {
+        if ($this->contactId) {
             $this->attachContactToLead($LeadModel, $this->contactId);
         }
-        echo 'creation completed'.PHP_EOL;
+        echo 'creation completed' . PHP_EOL;
     }
 
 
@@ -215,12 +201,10 @@ class Lead extends BaseAmoEntity
     {
         echo 'updating ' . $leadId . PHP_EOL;
         //Получим сделку
-        try
-        {
+        try {
             $LeadModel = $this->apiClient->leads()->getOne($leadId);
-        } catch (AmoCRMApiException $e)
-        {
-            printError($e);
+        } catch (AmoCRMApiException $e) {
+            ErrorPrinter::printError($e);
             die;
         }
 
@@ -231,28 +215,23 @@ class Lead extends BaseAmoEntity
         $TagModel->setName('Обновлено из 1С');
         $TagsCollection->add($TagModel);
         $TagsService = $this->apiClient->tags(EntityTypesInterface::LEADS);
-        try
-        {
+        try {
             $TagsService->add($TagsCollection);
-        } catch (AmoCRMApiException $e)
-        {
-            printError($e);
+        } catch (AmoCRMApiException $e) {
+            ErrorPrinter::printError($e);
             die;
         }
 
         //Обновляем подготовленный лид
-        try
-        {
+        try {
             $this->apiClient->leads()->updateOne($LeadModel);
-        } catch (AmoCRMApiException $e)
-        {
-            printError($e);
+        } catch (AmoCRMApiException $e) {
+            ErrorPrinter::printError($e);
             die;
         }
 
         //Привязываем контакт к сделке
-        if ($this->contactId)
-        {
+        if ($this->contactId) {
             $this->attachContactToLead($LeadModel, $this->contactId);
         }
     }
@@ -260,28 +239,23 @@ class Lead extends BaseAmoEntity
     /**
      * Наполнение лида данными по оплате
      * @param int $leadId
-     * @throws InvalidArgumentException
      */
     public function updatePayment(int $leadId)
     {
         //Получим сделку
-        try
-        {
+        try {
             $LeadModel = $this->apiClient->leads()->getOne($leadId);
-        } catch (AmoCRMApiException $e)
-        {
-            printError($e);
+        } catch (AmoCRMApiException $e) {
+            ErrorPrinter::printError($e);
             die;
         }
 
         $this->setLeadObjectDataPayment($LeadModel);
 
         //Обновляем подготовленный лид
-        try
-        {
+        try {
             $this->apiClient->leads()->updateOne($LeadModel);
-        } catch (AmoCRMApiException $e)
-        {
+        } catch (AmoCRMApiException $e) {
             echo $e->getMessage();
             die;
         }
@@ -292,35 +266,25 @@ class Lead extends BaseAmoEntity
      * @param LeadModel $LeadModel
      * @param int $contactId
      */
-    public function attachContactToLead(\AmoCRM\Models\LeadModel $LeadModel, int $contactId): void
+    public function attachContactToLead(LeadModel $LeadModel, int $contactId): void
     {
-        try
-        {
+        try {
             $contact = $this->apiClient->contacts()->getOne($contactId);
-        } catch (AmoCRMApiException $e)
-        {
-            printError($e);
+        } catch (AmoCRMApiException $e) {
+            ErrorPrinter::printError($e);
             die;
         }
 
         $links = new LinksCollection();
         $links->add($contact);
-        try
-        {
-            $this->apiClient->leads()->link($LeadModel, $links);
-        } catch (AmoCRMApiException $e)
-        {
-            printError($e);
-            die;
-        }
+        $this->apiClient->leads()->link($LeadModel, $links);
     }
 
     /**
      * Наполнить лид данными
      * @param LeadModel $LeadModel
-     * @throws AmoCRMApiException
      */
-    public function setLeadObjectData(\AmoCRM\Models\LeadModel $LeadModel)
+    public function setLeadObjectData(LeadModel $LeadModel)
     {
         $responsibleUserId = null;
         $User = new User($this->apiClient);
@@ -328,36 +292,35 @@ class Lead extends BaseAmoEntity
 
 
         //Находим id ответственного пользователя для нового контакта и лида. Пользователь - это сущность User.
-        if ($this->dataFromXml['ПочтаМенеджера'])
-        {
+        if ($this->dataFromXml['ПочтаМенеджера']) {
             $responsibleUserId = $User->getIdByLogin($this->dataFromXml['ПочтаМенеджера']);
         }
 
         //Устанавливаем ответственного
-        if ($responsibleUserId)
+        if ($responsibleUserId) {
             $LeadModel->setResponsibleUserId($responsibleUserId);
+        }
 
         $LeadModel->setUpdatedAt(time());
 
         //Находим id клиента по номеру телефона для нового лида. Клиент - это сущность Contact.
-        if ($this->dataFromXml['Телефон'])
-        {
+        if ($this->dataFromXml['Телефон']) {
             $this->contactId = $Contact->getIdByPhone($this->dataFromXml['Телефон']);
-            if (!$this->contactId)
+            if (!$this->contactId) {
                 $this->contactId = $Contact->create(
                     $this->dataFromXml['Телефон'],
                     $this->dataFromXml['Имя'],
                     $this->dataFromXml['ДеньРожденияКлиента'],
                     $this->dataFromXml['НомерПредъявленнойКартыЛояльности']
                 );
+            }
         }
 
         //Устанавливаем имя лида
         $LeadModel->setName('Тестовая сделка - ' . $this->dataFromXml['GUID']);
 
         //Устанавливаем стоимость
-        if ($this->dataFromXml['Бюджет'])
-        {
+        if ($this->dataFromXml['Бюджет']) {
             $price = preg_replace('/[^0-9]/', '', $this->dataFromXml['Бюджет']);
             $LeadModel->setPrice($price);
         }
@@ -365,74 +328,102 @@ class Lead extends BaseAmoEntity
         //Устанавливаем кастомные свойства лида
         $leadCustomFieldsValues = new CustomFieldsValuesCollection();
 
-        if ($this->dataFromXml['ТипДома'])
-        {
-            $this->setMultiSelectCustomField($leadCustomFieldsValues, self::HOUSE_NAME__CHECKBOX__FIELD_ID, $this->dataFromXml['ТипДома']);
+        if ($this->dataFromXml['ТипДома']) {
+            $this->setMultiSelectCustomField(
+                $leadCustomFieldsValues,
+                self::HOUSE_NAME__CHECKBOX__FIELD_ID,
+                $this->dataFromXml['ТипДома']
+            );
         }
-        if ($this->dataFromXml['Комплектация'])
-        {
-            $this->setMultiSelectCustomField($leadCustomFieldsValues, self::KOMPLECT__CHECKBOX__FIELD_ID, $this->dataFromXml['Комплектация']);
+        if ($this->dataFromXml['Комплектация']) {
+            $this->setMultiSelectCustomField(
+                $leadCustomFieldsValues,
+                self::KOMPLECT__CHECKBOX__FIELD_ID,
+                $this->dataFromXml['Комплектация']
+            );
         }
-        if ($this->dataFromXml['ИсточникРекламы'])
-        {
-            $this->setMultiSelectCustomField($leadCustomFieldsValues, self::RESOURCE__CHECKBOX__FIELD_ID, $this->dataFromXml['ИсточникРекламы']);
+        if ($this->dataFromXml['ИсточникРекламы']) {
+            $this->setMultiSelectCustomField(
+                $leadCustomFieldsValues,
+                self::RESOURCE__CHECKBOX__FIELD_ID,
+                $this->dataFromXml['ИсточникРекламы']
+            );
         }
-        if ($this->dataFromXml['GUID'])
-        {
-            $this->setTextCustomField($leadCustomFieldsValues, self::GUID__TEXT__FIELD_ID, $this->dataFromXml['GUID']);
+        if ($this->dataFromXml['GUID']) {
+            $this->setTextCustomField(
+                $leadCustomFieldsValues,
+                self::GUID__TEXT__FIELD_ID,
+                $this->dataFromXml['GUID']
+            );
         }
-        if ($this->dataFromXml['Предоплата'])
-        {
+        if ($this->dataFromXml['Предоплата']) {
             $this->setCheckboxCustomField($leadCustomFieldsValues, self::PREPAYMENT__TEXT__FIELD_ID);
         }
-        if ($this->dataFromXml['АдресМонтажа'])
-        {
-            $this->setTextCustomField($leadCustomFieldsValues, self::BUILDING_ADDRESS__TEXT__FIELD_ID, $this->dataFromXml['GUID']);
+        if ($this->dataFromXml['АдресМонтажа']) {
+            $this->setTextCustomField(
+                $leadCustomFieldsValues,
+                self::BUILDING_ADDRESS__TEXT__FIELD_ID,
+                $this->dataFromXml['GUID']
+            );
         }
-        if ($this->dataFromXml['Эффективность'])
-        {
-            $this->setTextCustomField($leadCustomFieldsValues, self::EFFICIENCY__TEXT__FIELD_ID, $this->dataFromXml['Эффективность']);
+        if ($this->dataFromXml['Эффективность']) {
+            $this->setTextCustomField(
+                $leadCustomFieldsValues,
+                self::EFFICIENCY__TEXT__FIELD_ID,
+                $this->dataFromXml['Эффективность']
+            );
         }
-        if ($this->dataFromXml['ФормаОплаты'])
-        {
-            $this->setSelectCustomField($leadCustomFieldsValues, self::PAYMENT_FORM__CHECKBOX__FIELD_ID, $this->dataFromXml['ФормаОплаты']);
+        if ($this->dataFromXml['ФормаОплаты']) {
+            $this->setSelectCustomField(
+                $leadCustomFieldsValues,
+                self::PAYMENT_FORM__CHECKBOX__FIELD_ID,
+                $this->dataFromXml['ФормаОплаты']
+            );
         }
-        if ($this->dataFromXml['ВариантОплаты'])
-        {
-            $this->setTextCustomField($leadCustomFieldsValues, self::PAYMENT_VARIANT__CHECKBOX__FIELD_ID, $this->dataFromXml['GUID']);
+        if ($this->dataFromXml['ВариантОплаты']) {
+            $this->setTextCustomField(
+                $leadCustomFieldsValues,
+                self::PAYMENT_VARIANT__CHECKBOX__FIELD_ID,
+                $this->dataFromXml['GUID']
+            );
         }
-        if ($this->dataFromXml['ДоговорКонтрагента'])
-        {
+        if ($this->dataFromXml['ДоговорКонтрагента']) {
             $this->setCheckboxCustomField($leadCustomFieldsValues, self::GUID__TEXT__FIELD_ID);
         }
-        if ($this->dataFromXml['НомерПредъявленнойКартыЛояльности'])
-        {
-            $this->setTextCustomField($leadCustomFieldsValues, self::LOYAL_CARD__TEXT__FIELD_ID, $this->dataFromXml['НомерПредъявленнойКартыЛояльности']);
+        if ($this->dataFromXml['НомерПредъявленнойКартыЛояльности']) {
+            $this->setTextCustomField(
+                $leadCustomFieldsValues,
+                self::LOYAL_CARD__TEXT__FIELD_ID,
+                $this->dataFromXml['НомерПредъявленнойКартыЛояльности']
+            );
         }
-        if ($this->dataFromXml['Регион'])
-        {
-            $this->setTextCustomField($leadCustomFieldsValues, self::REGION__CHECKBOX__FIELD_ID, $this->dataFromXml['Регион']);
+        if ($this->dataFromXml['Регион']) {
+            $this->setTextCustomField(
+                $leadCustomFieldsValues,
+                self::REGION__CHECKBOX__FIELD_ID,
+                $this->dataFromXml['Регион']
+            );
         }
-        if ($this->dataFromXml['Себестоимость'])
-        {
-            $this->setTextCustomField($leadCustomFieldsValues, self::INNER_PRICE__TEXT__FIELD_ID, $price = preg_replace('/[^0-9]/', '', $this->dataFromXml['Себестоимость']));
+        if ($this->dataFromXml['Себестоимость']) {
+            $this->setTextCustomField(
+                $leadCustomFieldsValues,
+                self::INNER_PRICE__TEXT__FIELD_ID,
+                $price = preg_replace('/[^0-9]/', '', $this->dataFromXml['Себестоимость'])
+            );
         }
-        if ($this->dataFromXml['ДатаИВремяВстречи'])
-        {
+        if ($this->dataFromXml['ДатаИВремяВстречи']) {
             $dateStart = substr($this->dataFromXml['ДатаИВремяВстречи'], 0, 10);
             $datetime = explode(".", $dateStart);
             $date = mktime(0, 0, 0, $datetime[1], $datetime[0], $datetime[2]);
             $this->setNumericCustomField($leadCustomFieldsValues, self::MEETING__DATE__FIELD_ID, $date);
         }
-        if ($this->dataFromXml['ДатаНачалаМонтажа'])
-        {
+        if ($this->dataFromXml['ДатаНачалаМонтажа']) {
             $dateStart = substr($this->dataFromXml['ДатаНачалаМонтажа'], 0, 10);
             $datetime = explode(".", $dateStart);
             $date = mktime(0, 0, 0, $datetime[1], $datetime[0], $datetime[2]);
             $this->setNumericCustomField($leadCustomFieldsValues, self::BUILDING_START__DATE__FIELD_ID, $date);
         }
-        if ($this->dataFromXml['ДатаОкончанияМонтажа'])
-        {
+        if ($this->dataFromXml['ДатаОкончанияМонтажа']) {
             $dateFinish = substr($this->dataFromXml['ДатаОкончанияМонтажа'], 0, 10);
             $datetime = explode(".", $dateFinish);
             $date = mktime(0, 0, 0, $datetime[1], $datetime[0], $datetime[2]);
@@ -447,7 +438,7 @@ class Lead extends BaseAmoEntity
      * Если оплат раньше не было - меняем статус у лида на 'Внесена предоплата'.
      * @param LeadModel $LeadModel
      */
-    public function setLeadObjectDataPayment(\AmoCRM\Models\LeadModel $LeadModel)
+    public function setLeadObjectDataPayment(LeadModel $LeadModel)
     {
         //Флаг, есть ли оплаты у лида
         $hasPayments = true;
@@ -458,24 +449,25 @@ class Lead extends BaseAmoEntity
         //Получаем кастомные свойства лида
         $leadCustomFieldsValues = $LeadModel->getCustomFieldsValues();
 
-        //Хак - в Amo URL хранятся с пробельными символами, если в таком же виде отправить назад - будет ошибка. Заменяем пробелы на соответствующий символ %20
+        //Хак - в Amo URL хранятся с пробельными символами, если в таком же виде отправить назад - будет ошибка.
+        //Заменяем пробелы на соответствующий символ %20
         $doc1Field = $leadCustomFieldsValues->getBy('fieldId', 513439);
-        if($doc1Field)
-        {
+        if ($doc1Field) {
             $doc1FieldValues = $doc1Field->getValues();
             $doc1FieldValue = $doc1FieldValues->first();
-            $doc1Field->setValues(
-                (new TextCustomFieldValueCollection())
-                    ->add(
-                        (new TextCustomFieldValueModel())
-                            ->setValue(str_replace(' ', '%20', $doc1FieldValue->value))
-                    )
-            );
+            if (!empty($doc1FieldValue->value)) {
+                $doc1Field->setValues(
+                    (new TextCustomFieldValueCollection())
+                        ->add(
+                            (new TextCustomFieldValueModel())
+                                ->setValue(str_replace(' ', '%20', $doc1FieldValue->value))
+                        )
+                );
+            }
         }
 
         //смотрим есть ли оплаты
-        for ($i = 1; $i <= 8; $i++)
-        {
+        for ($i = 1; $i <= 8; $i++) {
             $amountFieldId = self::PAYMENT__NUMERIC__FIELDS_ID[$i];
             $dateFieldId = self::PAYMENT_DATES__DATE__FIELDS_ID[$i];
             $amountField = $leadCustomFieldsValues->getBy('fieldId', $amountFieldId);
@@ -484,22 +476,22 @@ class Lead extends BaseAmoEntity
                 continue;
             } else {
                 //Если на первом шаге у лида не заполнен платеж - значит платежей еще не было
-                if($i===1)
+                if ($i === 1) {
                     $hasPayments = false;
+                }
 
                 //Первое найденное незаполненное поле платежа у лида. Заполняем значениями.
-                if ($this->dataFromXml['Summa'])
-                {
+                if ($this->dataFromXml['Summa']) {
                     $numericCustomFieldValueModel = new NumericCustomFieldValuesModel();
                     $numericCustomFieldValueModel->setFieldId($amountFieldId);
                     $numericCustomFieldValueModel->setValues(
                         (new numericCustomFieldValueCollection())
-                            ->add((new numericCustomFieldValueModel())->setValue(preg_replace('/[^0-9]/', '', $this->dataFromXml['Summa'])))
+                            ->add((new numericCustomFieldValueModel())->
+                            setValue(preg_replace('/[^0-9]/', '', $this->dataFromXml['Summa'])))
                     );
                     $leadCustomFieldsValues->add($numericCustomFieldValueModel);
                 }
-                if ($this->dataFromXml['DataPlatezha'])
-                {
+                if ($this->dataFromXml['DataPlatezha']) {
                     $payDate = substr($this->dataFromXml['DataPlatezha'], 0, 10);
                     $datetime = explode(".", $payDate);
                     $date = mktime(0, 0, 0, $datetime[1], $datetime[0], $datetime[2]);
@@ -514,8 +506,7 @@ class Lead extends BaseAmoEntity
                 break;
             }
         }
-        if (!$hasPayments)
-        {
+        if (!$hasPayments) {
             //Оплат еще не было - переводим в статус 'Внесена предоплата'
             $LeadModel->setStatusId(self::PREPAYMENT_STATUS);
         }

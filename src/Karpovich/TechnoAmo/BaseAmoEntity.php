@@ -3,27 +3,26 @@
 
 namespace Karpovich\TechnoAmo;
 
-
+use AmoCRM\Client\AmoCRMApiClient;
 use AmoCRM\Collections\CustomFieldsValuesCollection;
 use AmoCRM\Models\CustomFieldsValues\CheckboxCustomFieldValuesModel;
-use AmoCRM\Models\CustomFieldsValues\DateCustomFieldValuesModel;
+//use AmoCRM\Models\CustomFieldsValues\DateCustomFieldValuesModel;
 use AmoCRM\Models\CustomFieldsValues\MultiselectCustomFieldValuesModel;
 use AmoCRM\Models\CustomFieldsValues\NumericCustomFieldValuesModel;
 use AmoCRM\Models\CustomFieldsValues\SelectCustomFieldValuesModel;
 use AmoCRM\Models\CustomFieldsValues\TextCustomFieldValuesModel;
 use AmoCRM\Models\CustomFieldsValues\ValueCollections\CheckboxCustomFieldValueCollection;
-use AmoCRM\Models\CustomFieldsValues\ValueCollections\DateCustomFieldValueCollection;
+//use AmoCRM\Models\CustomFieldsValues\ValueCollections\DateCustomFieldValueCollection;
 use AmoCRM\Models\CustomFieldsValues\ValueCollections\MultiselectCustomFieldValueCollection;
 use AmoCRM\Models\CustomFieldsValues\ValueCollections\NumericCustomFieldValueCollection;
 use AmoCRM\Models\CustomFieldsValues\ValueCollections\SelectCustomFieldValueCollection;
 use AmoCRM\Models\CustomFieldsValues\ValueCollections\TextCustomFieldValueCollection;
 use AmoCRM\Models\CustomFieldsValues\ValueModels\CheckboxCustomFieldValueModel;
-use AmoCRM\Models\CustomFieldsValues\ValueModels\DateCustomFieldValueModel;
+//use AmoCRM\Models\CustomFieldsValues\ValueModels\DateCustomFieldValueModel;
 use AmoCRM\Models\CustomFieldsValues\ValueModels\MultiselectCustomFieldValueModel;
 use AmoCRM\Models\CustomFieldsValues\ValueModels\NumericCustomFieldValueModel;
 use AmoCRM\Models\CustomFieldsValues\ValueModels\SelectCustomFieldValueModel;
 use AmoCRM\Models\CustomFieldsValues\ValueModels\TextCustomFieldValueModel;
-
 
 /**
  * Базовый класс для всех сущностей АМО
@@ -34,14 +33,14 @@ use AmoCRM\Models\CustomFieldsValues\ValueModels\TextCustomFieldValueModel;
 class BaseAmoEntity
 {
     /**
-     * @var \AmoCRM\Client\AmoCRMApiClient
+     * @var AmoCRMApiClient
      */
     protected $apiClient;
 
     /**
-     * @param \AmoCRM\Client\AmoCRMApiClient $apiClient
+     * @param AmoCRMApiClient $apiClient
      */
-    public function __construct(\AmoCRM\Client\AmoCRMApiClient $apiClient)
+    public function __construct(AmoCRMApiClient $apiClient)
     {
         $this->apiClient = $apiClient;
     }
@@ -54,26 +53,25 @@ class BaseAmoEntity
      * @param int|null $enumId
      * @return bool
      */
-    public function setMultiSelectCustomField(\AmoCRM\Collections\CustomFieldsValuesCollection $customFieldsValuesCollection, int $fieldId, string $value = '', int $enumId = null): bool
-    {
+    public function setMultiSelectCustomField(
+        CustomFieldsValuesCollection $customFieldsValuesCollection,
+        int $fieldId,
+        string $value = '',
+        int $enumId = null
+    ): bool {
         $multiSelectCustomFieldValuesModel = new MultiSelectCustomFieldValuesModel();
         $multiSelectCustomFieldValuesModel->setFieldId($fieldId);
-        if ($enumId)
-        {
+        if ($enumId) {
             $multiSelectCustomFieldValuesModel->setValues(
                 (new MultiSelectCustomFieldValueCollection())
                     ->add((new MultiSelectCustomFieldValueModel())->setEnumId($enumId))
             );
-        }
-        elseif ($value)
-        {
+        } elseif ($value) {
             $multiSelectCustomFieldValuesModel->setValues(
                 (new MultiSelectCustomFieldValueCollection())
                     ->add((new MultiSelectCustomFieldValueModel())->setValue($value))
             );
-        }
-        else
-        {
+        } else {
             return false;
         }
         $customFieldsValuesCollection->add($multiSelectCustomFieldValuesModel);
@@ -88,26 +86,25 @@ class BaseAmoEntity
      * @param int|null $enumId
      * @return bool
      */
-    public function setSelectCustomField(\AmoCRM\Collections\CustomFieldsValuesCollection $customFieldsValuesCollection, int $fieldId, string $value = '', int $enumId = null): bool
-    {
+    public function setSelectCustomField(
+        CustomFieldsValuesCollection $customFieldsValuesCollection,
+        int $fieldId,
+        string $value = '',
+        int $enumId = null
+    ): bool {
         $selectCustomFieldValuesModel = new SelectCustomFieldValuesModel();
         $selectCustomFieldValuesModel->setFieldId($fieldId);
-        if ($enumId)
-        {
+        if ($enumId) {
             $selectCustomFieldValuesModel->setValues(
                 (new SelectCustomFieldValueCollection())
                     ->add((new SelectCustomFieldValueModel())->setEnumId($enumId))
             );
-        }
-        elseif ($value)
-        {
+        } elseif ($value) {
             $selectCustomFieldValuesModel->setValues(
                 (new MultiSelectCustomFieldValueCollection())
                     ->add((new MultiSelectCustomFieldValueModel())->setValue($value))
             );
-        }
-        else
-        {
+        } else {
             return false;
         }
         $customFieldsValuesCollection->add($selectCustomFieldValuesModel);
@@ -121,8 +118,11 @@ class BaseAmoEntity
      * @param string $value
      * @return void
      */
-    public function setTextCustomField(\AmoCRM\Collections\CustomFieldsValuesCollection $customFieldsValuesCollection, int $fieldId, string $value): void
-    {
+    public function setTextCustomField(
+        CustomFieldsValuesCollection $customFieldsValuesCollection,
+        int $fieldId,
+        string $value
+    ): void {
         $textCustomFieldValueModel = new TextCustomFieldValuesModel();
         $textCustomFieldValueModel->setFieldId($fieldId);
         $textCustomFieldValueModel->setValues(
@@ -136,11 +136,12 @@ class BaseAmoEntity
      * Установить значение true в поле с ID $fieldId в коллекцию CustomFieldsValuesCollection
      * @param CustomFieldsValuesCollection $customFieldsValuesCollection
      * @param int $fieldId
-     * @param string $value
      * @return void
      */
-    public function setCheckboxCustomField(\AmoCRM\Collections\CustomFieldsValuesCollection $customFieldsValuesCollection, int $fieldId): void
-    {
+    public function setCheckboxCustomField(
+        CustomFieldsValuesCollection $customFieldsValuesCollection,
+        int $fieldId
+    ): void {
         $checkboxCustomFieldValueModel = new CheckboxCustomFieldValuesModel();
         $checkboxCustomFieldValueModel->setFieldId($fieldId);
         $checkboxCustomFieldValueModel->setValues(
@@ -155,8 +156,11 @@ class BaseAmoEntity
      * @param int $fieldId
      * @param int $value
      */
-    public function setNumericCustomField(\AmoCRM\Collections\CustomFieldsValuesCollection $customFieldsValuesCollection, int $fieldId, int $value): void
-    {
+    public function setNumericCustomField(
+        CustomFieldsValuesCollection $customFieldsValuesCollection,
+        int $fieldId,
+        int $value
+    ): void {
         $numericCustomFieldValueModel = new NumericCustomFieldValuesModel();
         $numericCustomFieldValueModel->setFieldId($fieldId);
         $numericCustomFieldValueModel->setValues(
@@ -168,13 +172,15 @@ class BaseAmoEntity
 
     /**
      * Добавить дату в коллекцию CustomFieldsValuesCollection
-     * !!!На 17.06.2020 НЕ работает, AMO ожидает на вход int, а в этом методе параметр приводится к строке вида 'YYY-MM-DD'
+     * !!!На 17.06.2020 НЕ работает, AMO ожидает на вход int, а в этом методе параметр приводится к строке вида
+     * 'YYY-MM-DD'
      * @param CustomFieldsValuesCollection $customFieldsValuesCollection
      * @param int $fieldId
-     * @param string $value
      */
-    public function setDateCustomField(\AmoCRM\Collections\CustomFieldsValuesCollection $customFieldsValuesCollection, int $fieldId, string $value): void
-    {
+    /*public function setDateCustomField(
+        CustomFieldsValuesCollection $customFieldsValuesCollection,
+        int $fieldId
+    ): void {
         $dateCustomFieldValuesModel = new DateCustomFieldValuesModel();
         $dateCustomFieldValuesModel->setFieldId($fieldId);
         $dateCustomFieldValuesModel->setValues(
@@ -182,6 +188,5 @@ class BaseAmoEntity
                 ->add((new DateCustomFieldValueModel())->setValue(time()))
         );
         $customFieldsValuesCollection->add($dateCustomFieldValuesModel);
-    }
-
+    }*/
 }

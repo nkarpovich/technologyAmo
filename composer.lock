@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "59233c7f5ded5f10ecd3ba2b9830bf92",
+    "content-hash": "7e87b599d38750a8ffb0adf298e6b4ec",
     "packages": [
         {
             "name": "amocrm/amocrm-api-library",
@@ -441,7 +441,7 @@
         },
         {
             "name": "illuminate/contracts",
-            "version": "v6.18.22",
+            "version": "v6.18.23",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/contracts.git",
@@ -485,16 +485,16 @@
         },
         {
             "name": "illuminate/support",
-            "version": "v6.18.22",
+            "version": "v6.18.23",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/support.git",
-                "reference": "33eb4bb263602142831858033801796875d75d1d"
+                "reference": "254db0f9cf97fa19d67e1f78e27d5f209b2d40f7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/illuminate/support/zipball/33eb4bb263602142831858033801796875d75d1d",
-                "reference": "33eb4bb263602142831858033801796875d75d1d",
+                "url": "https://api.github.com/repos/illuminate/support/zipball/254db0f9cf97fa19d67e1f78e27d5f209b2d40f7",
+                "reference": "254db0f9cf97fa19d67e1f78e27d5f209b2d40f7",
                 "shasum": ""
             },
             "require": {
@@ -542,7 +542,7 @@
             ],
             "description": "The Illuminate Support package.",
             "homepage": "https://laravel.com",
-            "time": "2020-06-11T14:01:32+00:00"
+            "time": "2020-06-25T13:50:49+00:00"
         },
         {
             "name": "league/oauth2-client",
@@ -809,37 +809,6 @@
                 "random"
             ],
             "time": "2018-07-02T15:55:56+00:00"
-        },
-        {
-            "name": "pds/skeleton",
-            "version": "1.x-dev",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/php-pds/skeleton.git",
-                "reference": "75afe0c74131620b18239174bc67d6229bea273a"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/php-pds/skeleton/zipball/75afe0c74131620b18239174bc67d6229bea273a",
-                "reference": "75afe0c74131620b18239174bc67d6229bea273a",
-                "shasum": ""
-            },
-            "bin": [
-                "bin/pds-skeleton"
-            ],
-            "type": "standard",
-            "autoload": {
-                "psr-4": {
-                    "Pds\\Skeleton\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "CC-BY-SA-4.0"
-            ],
-            "description": "Standard for PHP package skeletons.",
-            "homepage": "https://github.com/php-pds/skeleton",
-            "time": "2017-09-11T21:05:23+00:00"
         },
         {
             "name": "psr/container",
@@ -1719,6 +1688,88 @@
     ],
     "packages-dev": [
         {
+            "name": "pds/skeleton",
+            "version": "1.x-dev",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/php-pds/skeleton.git",
+                "reference": "75afe0c74131620b18239174bc67d6229bea273a"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/php-pds/skeleton/zipball/75afe0c74131620b18239174bc67d6229bea273a",
+                "reference": "75afe0c74131620b18239174bc67d6229bea273a",
+                "shasum": ""
+            },
+            "bin": [
+                "bin/pds-skeleton"
+            ],
+            "type": "standard",
+            "autoload": {
+                "psr-4": {
+                    "Pds\\Skeleton\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "CC-BY-SA-4.0"
+            ],
+            "description": "Standard for PHP package skeletons.",
+            "homepage": "https://github.com/php-pds/skeleton",
+            "time": "2017-09-11T21:05:23+00:00"
+        },
+        {
+            "name": "squizlabs/php_codesniffer",
+            "version": "3.5.4",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/squizlabs/PHP_CodeSniffer.git",
+                "reference": "dceec07328401de6211037abbb18bda423677e26"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/squizlabs/PHP_CodeSniffer/zipball/dceec07328401de6211037abbb18bda423677e26",
+                "reference": "dceec07328401de6211037abbb18bda423677e26",
+                "shasum": ""
+            },
+            "require": {
+                "ext-simplexml": "*",
+                "ext-tokenizer": "*",
+                "ext-xmlwriter": "*",
+                "php": ">=5.4.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^4.0 || ^5.0 || ^6.0 || ^7.0"
+            },
+            "bin": [
+                "bin/phpcs",
+                "bin/phpcbf"
+            ],
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "3.x-dev"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "authors": [
+                {
+                    "name": "Greg Sherwood",
+                    "role": "lead"
+                }
+            ],
+            "description": "PHP_CodeSniffer tokenizes PHP, JavaScript and CSS files and detects violations of a defined set of coding standards.",
+            "homepage": "https://github.com/squizlabs/PHP_CodeSniffer",
+            "keywords": [
+                "phpcs",
+                "standards"
+            ],
+            "time": "2020-01-30T22:20:29+00:00"
+        },
+        {
             "name": "symfony/var-dumper",
             "version": "v5.1.0",
             "source": {
@@ -1805,7 +1856,5 @@
     "platform": {
         "ext-simplexml": "*"
     },
-    "platform-dev": {
-        "ext-simplexml": "*"
-    }
+    "platform-dev": []
 }
