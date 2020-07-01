@@ -60,7 +60,7 @@ class Lead extends BaseAmoEntity
     /**
      * Тип и размеры
      */
-    const TYPE_SIZE__CHECKBOX__FIELD_ID = 267787;
+    //const TYPE_SIZE__CHECKBOX__FIELD_ID = 267787;
     /**
      * Комплектация
      */
@@ -68,7 +68,7 @@ class Lead extends BaseAmoEntity
     /**
      * Форма оплаты
      */
-    const PAYMENT_FORM__CHECKBOX__FIELD_ID = 267813;
+    const PAYMENT_FORM__CHECKBOX__FIELD_ID = 268095;
     /**
      * Варианты оплаты
      */
