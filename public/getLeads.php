@@ -13,10 +13,10 @@ use Symfony\Component\VarDumper\VarDumper;
 
 $filesystem = new Filesystem();
 
-// create a log channel
 $log = new Logger('leads');
 $log->pushHandler(new StreamHandler(__DIR__ . '/../logs/getLeadsFromAmo.log', Logger::INFO));
 
+//Устанавливаем токен для доступа к API
 Token::setAccessToken($apiClient, $clientAuth, $log, $pathToTokenFile);
 
 $log->info('Start ' . date('d.m.Y H:i:s') . PHP_EOL);
@@ -81,7 +81,6 @@ try {
     if ($e->getCode() != '204') {
         $log->error($e->getMessage());
         ErrorPrinter::printError($e);
-        VarDumper::dump($e->getDescription());
         die;
     } else {
         $leadId = false;
