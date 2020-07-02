@@ -91,7 +91,7 @@ if ($arFiles) {
             $log->error('Не удалось открыть файл ' . $fileName);
         }
         try {
-            $filesystem->rename($fileName, $pathToOldLeadsXml . $file);
+            $filesystem->rename($fileName, $pathToOldLeadsXml . $file, true);
         } catch (IOExceptionInterface $exception) {
             $log->error("An error occurred while renaming your file at " . $exception->getPath());
             echo "An error occurred while renaming your file at " . $exception->getPath();

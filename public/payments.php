@@ -73,7 +73,7 @@ if ($arFiles) {
             die('Не удалось открыть файл ' . $fileName);
         }
         try {
-            $filesystem->rename($fileName, $pathToOldPaymentsXml . $file);
+            $filesystem->rename($fileName, $pathToOldPaymentsXml . $file, true);
         } catch (IOExceptionInterface $exception) {
             $log->error("An error occurred while renaming your file at " . $exception->getPath());
             echo "An error occurred while renaming your file at " . $exception->getPath();
