@@ -70,6 +70,7 @@ if ($arFiles) {
                         echo 'creating new Lead GUID '.$leadGUID.PHP_EOL;
                         try {
                             $Lead->create();
+                            echo 'creation completed' . PHP_EOL;
                         } catch (BaseAmoEntityException $e) {
                             $log->error($e->getMessage());
                             echo $e->getMessage();

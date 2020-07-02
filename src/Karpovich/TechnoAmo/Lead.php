@@ -184,7 +184,6 @@ class Lead extends BaseAmoEntity
         if ($this->contactId) {
             $this->attachContactToLead($LeadModel, $this->contactId);
         }
-        echo 'creation completed' . PHP_EOL;
     }
 
 
@@ -430,7 +429,7 @@ class Lead extends BaseAmoEntity
                     (new TextCustomFieldValueCollection())
                         ->add(
                             (new TextCustomFieldValueModel())
-                                ->setValue(str_replace(' ', '%20', $doc1FieldValue->value))
+                                ->setValue(urlencode(' ', '%20', $doc1FieldValue->value))
                         )
                 );
             }
