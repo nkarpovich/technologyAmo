@@ -24,7 +24,7 @@ $log->info('Start ' . date('d.m.Y H:i:s') . PHP_EOL);
 try {
     $filter = new LeadsFilter();
     $xml = new SimpleXMLElement('<xml/>');
-    for ($i = 1; $i < 1000; $i++) {
+    for ($i = 8; $i < 1000; $i++) {
         if ($i===8) {
             continue;
         }

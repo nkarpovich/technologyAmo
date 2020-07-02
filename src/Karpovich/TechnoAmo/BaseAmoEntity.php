@@ -12,18 +12,22 @@ use AmoCRM\Models\CustomFieldsValues\MultiselectCustomFieldValuesModel;
 use AmoCRM\Models\CustomFieldsValues\NumericCustomFieldValuesModel;
 use AmoCRM\Models\CustomFieldsValues\SelectCustomFieldValuesModel;
 use AmoCRM\Models\CustomFieldsValues\TextCustomFieldValuesModel;
+use AmoCRM\Models\CustomFieldsValues\UrlCustomFieldValuesModel;
 use AmoCRM\Models\CustomFieldsValues\ValueCollections\CheckboxCustomFieldValueCollection;
 //use AmoCRM\Models\CustomFieldsValues\ValueCollections\DateCustomFieldValueCollection;
 use AmoCRM\Models\CustomFieldsValues\ValueCollections\MultiselectCustomFieldValueCollection;
 use AmoCRM\Models\CustomFieldsValues\ValueCollections\NumericCustomFieldValueCollection;
 use AmoCRM\Models\CustomFieldsValues\ValueCollections\SelectCustomFieldValueCollection;
 use AmoCRM\Models\CustomFieldsValues\ValueCollections\TextCustomFieldValueCollection;
+use AmoCRM\Models\CustomFieldsValues\ValueCollections\UrlCustomFieldValueCollection;
 use AmoCRM\Models\CustomFieldsValues\ValueModels\CheckboxCustomFieldValueModel;
 //use AmoCRM\Models\CustomFieldsValues\ValueModels\DateCustomFieldValueModel;
 use AmoCRM\Models\CustomFieldsValues\ValueModels\MultiselectCustomFieldValueModel;
 use AmoCRM\Models\CustomFieldsValues\ValueModels\NumericCustomFieldValueModel;
 use AmoCRM\Models\CustomFieldsValues\ValueModels\SelectCustomFieldValueModel;
 use AmoCRM\Models\CustomFieldsValues\ValueModels\TextCustomFieldValueModel;
+use AmoCRM\Models\CustomFieldsValues\ValueModels\UrlCustomFieldValueModel;
+use Karpovich\Helper;
 use Karpovich\TechnoAmo\Exceptions\BaseAmoEntityException;
 
 /**
@@ -127,6 +131,8 @@ class BaseAmoEntity
         int $fieldId,
         string $value
     ): void {
+//        echo $value;
+//        die('2');
         $textCustomFieldValueModel = new TextCustomFieldValuesModel();
         $textCustomFieldValueModel->setFieldId($fieldId);
         $textCustomFieldValueModel->setValues(
@@ -135,6 +141,28 @@ class BaseAmoEntity
         );
         $customFieldsValuesCollection->add($textCustomFieldValueModel);
     }
+
+    /**
+     * Добавить значение типа 'ссылка' в коллекцию CustomFieldsValuesCollection
+     * @param CustomFieldsValuesCollection $customFieldsValuesCollection
+     * @param int $fieldId
+     * @param string $url
+     * @return void
+     */
+    public function setUrlCustomField(
+        CustomFieldsValuesCollection $customFieldsValuesCollection,
+        int $fieldId,
+        string $url
+    ): void {
+        $urlCustomFieldValueModel = new UrlCustomFieldValuesModel();
+        $urlCustomFieldValueModel->setFieldId($fieldId);
+        $urlCustomFieldValueModel->setValues(
+            (new UrlCustomFieldValueCollection())
+                ->add((new UrlCustomFieldValueModel())->setValue($url))
+        );
+        $customFieldsValuesCollection->add($urlCustomFieldValueModel);
+    }
+
 
     /**
      * Установить значение true в поле с ID $fieldId в коллекцию CustomFieldsValuesCollection
