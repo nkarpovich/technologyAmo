@@ -4,6 +4,7 @@ require_once '../public/bootstrap.php';
 use AmoCRM\Filters\LeadsFilter;
 use AmoCRM\Exceptions\AmoCRMApiException;
 use Karpovich\TechnoAmo\ErrorPrinter;
+use Karpovich\TechnoAmo\Exceptions\BaseAmoEntityException;
 use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
 use Symfony\Component\Filesystem\Exception\IOExceptionInterface;
@@ -67,11 +68,18 @@ if ($arFiles) {
                     try {
                         $log->info('creating new Lead GUID '.$leadGUID.PHP_EOL);
                         echo 'creating new Lead GUID '.$leadGUID.PHP_EOL;
-                        $Lead->create();
+                        try {
+                            $Lead->create();
+                        } catch (BaseAmoEntityException $e) {
+                            $log->error($e->getMessage());
+                            echo $e->getMessage();
+                            continue;
+                        }
                     } catch (AmoCRMApiException $e) {
                         $log->error($e->getMessage());
                         ErrorPrinter::printError($e);
-                        die;
+                        continue;
+//                        die;
                     }
                 } else {
                     try {
@@ -79,13 +87,15 @@ if ($arFiles) {
                     } catch (AmoCRMApiException $e) {
                         $log->error($e->getMessage());
                         ErrorPrinter::printError($e);
-                        die;
+                        continue;
+//                        die;
                     }
                 }
             } catch (AmoCRMApiException $e) {
                 $log->error($e->getMessage());
                 ErrorPrinter::printError($e);
-                die;
+                continue;
+//                die;
             }
         } else {
             $log->error('Не удалось открыть файл ' . $fileName);

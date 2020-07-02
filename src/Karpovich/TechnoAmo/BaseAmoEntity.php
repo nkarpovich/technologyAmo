@@ -5,6 +5,7 @@ namespace Karpovich\TechnoAmo;
 
 use AmoCRM\Client\AmoCRMApiClient;
 use AmoCRM\Collections\CustomFieldsValuesCollection;
+use AmoCRM\Exceptions\AmoCRMApiException;
 use AmoCRM\Models\CustomFieldsValues\CheckboxCustomFieldValuesModel;
 //use AmoCRM\Models\CustomFieldsValues\DateCustomFieldValuesModel;
 use AmoCRM\Models\CustomFieldsValues\MultiselectCustomFieldValuesModel;
@@ -23,6 +24,7 @@ use AmoCRM\Models\CustomFieldsValues\ValueModels\MultiselectCustomFieldValueMode
 use AmoCRM\Models\CustomFieldsValues\ValueModels\NumericCustomFieldValueModel;
 use AmoCRM\Models\CustomFieldsValues\ValueModels\SelectCustomFieldValueModel;
 use AmoCRM\Models\CustomFieldsValues\ValueModels\TextCustomFieldValueModel;
+use Karpovich\TechnoAmo\Exceptions\BaseAmoEntityException;
 
 /**
  * Базовый класс для всех сущностей АМО
@@ -52,6 +54,7 @@ class BaseAmoEntity
      * @param string $value
      * @param int|null $enumId
      * @return bool
+     * @throws BaseAmoEntityException
      */
     public function setMultiSelectCustomField(
         CustomFieldsValuesCollection $customFieldsValuesCollection,
@@ -72,7 +75,8 @@ class BaseAmoEntity
                     ->add((new MultiSelectCustomFieldValueModel())->setValue($value))
             );
         } else {
-            return false;
+            throw new BaseAmoEntityException('В метод '.__METHOD__.' класса '.__CLASS__.
+                ' необходимо передать либо $value либо $enumId');
         }
         $customFieldsValuesCollection->add($multiSelectCustomFieldValuesModel);
         return true;

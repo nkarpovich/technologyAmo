@@ -151,6 +151,7 @@ class Lead extends BaseAmoEntity
     /**
      * Создать нового лида на основе данных, полученных XML документа
      * @throws AmoCRMApiException
+     * @throws Exceptions\BaseAmoEntityException
      */
     public function create()
     {
@@ -283,6 +284,7 @@ class Lead extends BaseAmoEntity
     /**
      * Наполнить лид данными
      * @param LeadModel $LeadModel
+     * @throws Exceptions\BaseAmoEntityException
      */
     public function setLeadObjectData(LeadModel $LeadModel)
     {
