@@ -174,16 +174,10 @@ class Lead extends BaseAmoEntity
             $TagsService->add($TagsCollection);
         } catch (AmoCRMApiException $e) {
             ErrorPrinter::printError($e);
-            die;
         }
         //Добавляем подготовленный лид
-        try {
-            $leadsService = $this->apiClient->leads();
-            $LeadModel = $leadsService->addOne($LeadModel);
-        } catch (AmoCRMApiException $e) {
-            ErrorPrinter::printError($e);
-            die;
-        }
+        $leadsService = $this->apiClient->leads();
+        $LeadModel = $leadsService->addOne($LeadModel);
 
         //Привязываем контакт к сделке
         if ($this->contactId) {
