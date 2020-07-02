@@ -380,13 +380,13 @@ class Lead extends BaseAmoEntity
                 $this->dataFromXml['ФормаОплаты']
             );
         }
-        if ($this->dataFromXml['ВариантОплаты']) {
+        /*if ($this->dataFromXml['ВариантОплаты']) {
             $this->setSelectCustomField(
                 $leadCustomFieldsValues,
                 self::PAYMENT_VARIANT__CHECKBOX__FIELD_ID,
                 $this->dataFromXml['ВариантОплаты']
             );
-        }
+        }*/
         /*if ($this->dataFromXml['ДоговорКонтрагента']) {
             $this->setCheckboxCustomField($leadCustomFieldsValues, self::);
         }*/
