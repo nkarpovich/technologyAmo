@@ -49,7 +49,7 @@ class Lead extends BaseAmoEntity
     ];
 
     /**
-     *
+     * Статус предоплаты
      */
     const PREPAYMENT_STATUS = 22331134;
 
@@ -384,12 +384,12 @@ class Lead extends BaseAmoEntity
             $this->setTextCustomField(
                 $leadCustomFieldsValues,
                 self::PAYMENT_VARIANT__CHECKBOX__FIELD_ID,
-                $this->dataFromXml['GUID']
+                $this->dataFromXml['ВариантОплаты']
             );
         }
-        if ($this->dataFromXml['ДоговорКонтрагента']) {
-            $this->setCheckboxCustomField($leadCustomFieldsValues, self::GUID__TEXT__FIELD_ID);
-        }
+        /*if ($this->dataFromXml['ДоговорКонтрагента']) {
+            $this->setCheckboxCustomField($leadCustomFieldsValues, self::);
+        }*/
         if ($this->dataFromXml['НомерПредъявленнойКартыЛояльности']) {
             $this->setTextCustomField(
                 $leadCustomFieldsValues,

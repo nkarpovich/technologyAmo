@@ -24,7 +24,10 @@ $log->info('Start ' . date('d.m.Y H:i:s') . PHP_EOL);
 try {
     $filter = new LeadsFilter();
     $xml = new SimpleXMLElement('<xml/>');
-    for ($i = 8; $i < 1000; $i++) {
+    for ($i = 1; $i < 1000; $i++) {
+        if ($i===8) {
+            continue;
+        }
         //Максимум - 250
         $filter->setLimit(250);
         $filter->setPage($i);
@@ -60,8 +63,10 @@ try {
                     if ($customFields) {
                         //Получим значение поля по его коду
                         $phoneField = $customFields->getBy('fieldCode', 'PHONE');
+
                         if ($phoneField) {
                             $phone = $phoneField->getValues()->first()->value;
+//                            VarDumper::dump($phone);
                             $leadXml->addChild('phone', $phone);
 //                            \Symfony\Component\VarDumper\VarDumper::dump($phone);
                         }
