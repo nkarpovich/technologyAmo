@@ -8,6 +8,7 @@ use AmoCRM\Collections\CustomFieldsValuesCollection;
 use AmoCRM\Collections\LinksCollection;
 use AmoCRM\Collections\TagsCollection;
 use AmoCRM\Exceptions\AmoCRMApiException;
+use AmoCRM\Exceptions\AmoCRMoAuthApiException;
 use AmoCRM\Helpers\EntityTypesInterface;
 use AmoCRM\Models\CustomFieldsValues\NumericCustomFieldValuesModel;
 use AmoCRM\Models\CustomFieldsValues\ValueCollections\NumericCustomFieldValueCollection;
@@ -72,7 +73,7 @@ class Lead extends BaseAmoEntity
     /**
      * Варианты оплаты
      */
-    const PAYMENT_VARIANT__CHECKBOX__FIELD_ID = 268455;
+//    const PAYMENT_VARIANT__CHECKBOX__FIELD_ID = 268455;
     /**
      * Источник
      */
@@ -190,18 +191,13 @@ class Lead extends BaseAmoEntity
     /**
      * Обновить лида на основе данных, полученных XML документа
      * @param int $leadId
-     * @throws AmoCRMApiException
+     * @throws AmoCRMApiException|Exceptions\BaseAmoEntityException
      */
     public function update(int $leadId)
     {
         echo 'updating ' . $leadId . PHP_EOL;
         //Получим сделку
-        try {
-            $LeadModel = $this->apiClient->leads()->getOne($leadId);
-        } catch (AmoCRMApiException $e) {
-            ErrorPrinter::printError($e);
-            die;
-        }
+        $LeadModel = $this->apiClient->leads()->getOne($leadId);
 
         $this->setLeadObjectData($LeadModel);
 
@@ -210,20 +206,10 @@ class Lead extends BaseAmoEntity
         $TagModel->setName('Обновлено из 1С');
         $TagsCollection->add($TagModel);
         $TagsService = $this->apiClient->tags(EntityTypesInterface::LEADS);
-        try {
-            $TagsService->add($TagsCollection);
-        } catch (AmoCRMApiException $e) {
-            ErrorPrinter::printError($e);
-            die;
-        }
+        $TagsService->add($TagsCollection);
 
         //Обновляем подготовленный лид
-        try {
-            $this->apiClient->leads()->updateOne($LeadModel);
-        } catch (AmoCRMApiException $e) {
-            ErrorPrinter::printError($e);
-            die;
-        }
+        $this->apiClient->leads()->updateOne($LeadModel);
 
         //Привязываем контакт к сделке
         if ($this->contactId) {
@@ -234,42 +220,30 @@ class Lead extends BaseAmoEntity
     /**
      * Наполнение лида данными по оплате
      * @param int $leadId
+     * @throws AmoCRMApiException
+     * @throws AmoCRMoAuthApiException
      */
     public function updatePayment(int $leadId)
     {
         //Получим сделку
-        try {
-            $LeadModel = $this->apiClient->leads()->getOne($leadId);
-        } catch (AmoCRMApiException $e) {
-            ErrorPrinter::printError($e);
-            die;
-        }
+        $LeadModel = $this->apiClient->leads()->getOne($leadId);
 
         $this->setLeadObjectDataPayment($LeadModel);
 
         //Обновляем подготовленный лид
-        try {
-            $this->apiClient->leads()->updateOne($LeadModel);
-        } catch (AmoCRMApiException $e) {
-            echo $e->getMessage();
-            die;
-        }
+        $this->apiClient->leads()->updateOne($LeadModel);
     }
 
     /**
      * Привязать контакт к лиду
      * @param LeadModel $LeadModel
      * @param int $contactId
+     * @throws AmoCRMApiException
+     * @throws AmoCRMoAuthApiException
      */
     public function attachContactToLead(LeadModel $LeadModel, int $contactId): void
     {
-        try {
-            $contact = $this->apiClient->contacts()->getOne($contactId);
-        } catch (AmoCRMApiException $e) {
-            ErrorPrinter::printError($e);
-            die;
-        }
-
+        $contact = $this->apiClient->contacts()->getOne($contactId);
         $links = new LinksCollection();
         $links->add($contact);
         $this->apiClient->leads()->link($LeadModel, $links);
