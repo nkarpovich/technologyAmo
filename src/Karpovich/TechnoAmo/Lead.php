@@ -108,7 +108,7 @@ class Lead extends BaseAmoEntity
     /**
      * Предоплата
      */
-    const PREPAYMENT__TEXT__FIELD_ID = 690772;
+    const PREPAYMENT__TEXT__FIELD_ID = 691618;
     /**
      * Эффективность
      */
@@ -301,7 +301,7 @@ class Lead extends BaseAmoEntity
 
         //Устанавливаем стоимость
         if ($this->dataFromXml['Бюджет']) {
-            $price = preg_replace('/[^0-9]/', '', $this->dataFromXml['Бюджет']);
+            $price = Helper::formatInt($this->dataFromXml['Бюджет']);
             $LeadModel->setPrice($price);
         }
 
@@ -388,7 +388,7 @@ class Lead extends BaseAmoEntity
             $this->setTextCustomField(
                 $leadCustomFieldsValuesCollection,
                 self::INNER_PRICE__TEXT__FIELD_ID,
-                $price = preg_replace('/[^0-9]/', '', $this->dataFromXml['Себестоимость'])
+                $price = Helper::formatInt($this->dataFromXml['Себестоимость'])
             );
         }
         if ($this->dataFromXml['ДатаИВремяВстречи']) {
@@ -401,7 +401,11 @@ class Lead extends BaseAmoEntity
             $dateStart = substr($this->dataFromXml['ДатаНачалаМонтажа'], 0, 10);
             $datetime = explode(".", $dateStart);
             $date = mktime(0, 0, 0, $datetime[1], $datetime[0], $datetime[2]);
-            $this->setNumericCustomField($leadCustomFieldsValuesCollection, self::BUILDING_START__DATE__FIELD_ID, $date);
+            $this->setNumericCustomField(
+                $leadCustomFieldsValuesCollection,
+                self::BUILDING_START__DATE__FIELD_ID,
+                $date
+            );
         }
         if ($this->dataFromXml['ДатаОкончанияМонтажа']) {
             $dateFinish = substr($this->dataFromXml['ДатаОкончанияМонтажа'], 0, 10);
@@ -473,11 +477,7 @@ class Lead extends BaseAmoEntity
                         $this->setTextCustomField(
                             $leadCustomFieldsValuesCollection,
                             $amountFieldId,
-                            preg_replace(
-                                '/[^0-9]/',
-                                '',
-                                $this->dataFromXml['Summa']
-                            )
+                            Helper::formatInt($this->dataFromXml['Summa'])
                         );
                     }
                     if ($this->dataFromXml['DataPlatezha'] && strlen($this->dataFromXml['DataPlatezha'])>3) {

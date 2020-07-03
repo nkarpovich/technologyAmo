@@ -63,4 +63,9 @@ class Helper
         $fragment = isset($parsed_url['fragment']) ? '#' . $parsed_url['fragment'] : '';
         return "$scheme$user$pass$host$port$path$query$fragment";
     }
+
+    public static function formatInt(string $param)
+    {
+        return (int)preg_replace('/[^0-9]/', '', $param);
+    }
 }

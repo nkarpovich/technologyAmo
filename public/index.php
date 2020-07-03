@@ -19,9 +19,12 @@ $filesystem = new Filesystem();
 $log = new Logger('leads');
 $log->pushHandler(new StreamHandler(__DIR__.'/../logs/leads.log', Logger::INFO));
 
+//Устанавливаем токен для доступа к API
 Token::setAccessToken($apiClient, $clientAuth, $log, $pathToTokenFile);
 
 $log->info('Start '.date('d.m.Y H:i:s').PHP_EOL);
+$log->
+
 //Получаем все файлы лидов, прилетевших из 1С
 $arFiles = Helper::scanDir($pathToLeadsXml);
 if ($arFiles) {
@@ -35,7 +38,7 @@ if ($arFiles) {
             try {
                 if ($leadId) {
                     //Ищем лид по ID
-                    $leadId = preg_replace('/[^0-9]/', '', $leadId);
+                    $leadId = Helper::formatInt($leadId);
                     $lead = $apiClient->leads()->getOne($leadId);
                 } elseif ($leadGUID) {
                     //Ищем лид по GUID
@@ -45,7 +48,6 @@ if ($arFiles) {
                     try {
                         $leadsCollection = $apiClient->leads()->get($filter);
                         if (!$leadsCollection->isEmpty()) {
-                            //                        \Symfony\Component\VarDumper\VarDumper::dump($leadsCollection->toArray());
                             $lead = $leadsCollection->first();
                         }
                         $leadId = $lead->getId();

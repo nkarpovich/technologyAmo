@@ -25,9 +25,9 @@ try {
     $filter = new LeadsFilter();
     $xml = new SimpleXMLElement('<xml/>');
     for ($i = 8; $i < 1000; $i++) {
-        if ($i===8) {
+        /*if ($i===8) {
             continue;
-        }
+        }*/
         //Максимум - 250
         $filter->setLimit(250);
         $filter->setPage($i);
@@ -66,9 +66,7 @@ try {
 
                         if ($phoneField) {
                             $phone = $phoneField->getValues()->first()->value;
-//                            VarDumper::dump($phone);
                             $leadXml->addChild('phone', $phone);
-//                            \Symfony\Component\VarDumper\VarDumper::dump($phone);
                         }
                     }
                     $name = $contact->getName();
@@ -76,7 +74,6 @@ try {
                         $leadXml->addChild('name', $name);
                     }
                 }
-//                echo $leadXml->asXML();
                 $leadsIterator->next();
             }
         }
