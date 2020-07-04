@@ -33,8 +33,10 @@ class Contact extends BaseAmoEntity
         try {
             $contacts = $this->apiClient->contacts()->get($filter);
         } catch (AmoCRMApiException $e) {
-            ErrorPrinter::printError($e);
-            die;
+//            ErrorPrinter::printError($e);
+            if ($e->getCode() == 204) {
+                return false;
+            }
         }
         if (!$contacts->isEmpty()) {
             $Contact = $contacts->first()->toArray();
@@ -69,7 +71,10 @@ class Contact extends BaseAmoEntity
             $this->setTextCustomField($contactCustomFieldsValues, self::PHONE__FIELD_ID, $phone);
         }
         if ($birthDate) {
-            $this->setTextCustomField($contactCustomFieldsValues, self::CARD__FIELD_ID, $birthDate);
+            $d = substr($birthDate, 0, 10);
+            $datetime = explode(".", $d);
+            $date = mktime(0, 0, 0, $datetime[1], $datetime[0], $datetime[2]);
+            $this->setNumericCustomField($contactCustomFieldsValues, self::CARD__FIELD_ID, $date);
         }
         if ($card) {
             $this->setTextCustomField($contactCustomFieldsValues, self::BIRTH_DATE__FIELD_ID, $card);

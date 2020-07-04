@@ -21,6 +21,7 @@ use AmoCRM\Models\CustomFieldsValues\ValueModels\TextCustomFieldValueModel;
 use AmoCRM\Models\CustomFieldsValues\ValueModels\UrlCustomFieldValueModel;
 use AmoCRM\Models\LeadModel;
 use AmoCRM\Models\TagModel;
+use AmoCRM\OAuth2\Client\Provider\AmoCRMException;
 use Karpovich\Helper;
 use SimpleXMLElement;
 use Symfony\Component\VarDumper\VarDumper;
@@ -253,10 +254,14 @@ class Lead extends BaseAmoEntity
      */
     public function attachContactToLead(LeadModel $LeadModel, int $contactId): void
     {
-        $contact = $this->apiClient->contacts()->getOne($contactId);
-        $links = new LinksCollection();
-        $links->add($contact);
-        $this->apiClient->leads()->link($LeadModel, $links);
+        try {
+            $contact = $this->apiClient->contacts()->getOne($contactId);
+            $links = new LinksCollection();
+            $links->add($contact);
+            $this->apiClient->leads()->link($LeadModel, $links);
+        } catch (AmoCRMApiException $e) {
+            ErrorPrinter::printError($e);
+        }
     }
 
     /**

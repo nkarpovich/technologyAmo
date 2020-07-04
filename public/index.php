@@ -23,10 +23,11 @@ $log->pushHandler(new StreamHandler(__DIR__.'/../logs/leads.log', Logger::INFO))
 Token::setAccessToken($apiClient, $clientAuth, $log, $pathToTokenFile);
 
 $log->info('Start '.date('d.m.Y H:i:s').PHP_EOL);
-$log->
 
 //Получаем все файлы лидов, прилетевших из 1С
 $arFiles = Helper::scanDir($pathToLeadsXml);
+//echo $pathToLeadsXml;
+//var_dump($arFiles);
 if ($arFiles) {
     foreach ($arFiles as $file) {
         $fileName = $pathToLeadsXml . $file;
@@ -92,6 +93,9 @@ if ($arFiles) {
                         ErrorPrinter::printError($e);
                         continue;
 //                        die;
+                    } catch (BaseAmoEntityException $e) {
+                        echo $e->getMessage();
+                        continue;
                     }
                 }
             } catch (AmoCRMApiException $e) {
