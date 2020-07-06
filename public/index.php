@@ -1,5 +1,5 @@
 <?php
-require_once $baseDir.'/public/bootstrap.php';
+require_once __DIR__.'/../public/bootstrap.php';
 
 use AmoCRM\Filters\LeadsFilter;
 use AmoCRM\Exceptions\AmoCRMApiException;
