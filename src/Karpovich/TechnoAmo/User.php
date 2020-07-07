@@ -27,13 +27,10 @@ class User extends BaseAmoEntity
         try {
             $usersCollection = $usersService->get();
             $arUsers = $usersCollection->toArray();
-//            VarDumper::dump($arUsers);
         } catch (AmoCRMApiException $e) {
             ErrorPrinter::printError($e);
-            die;
         }
         foreach ($arUsers as $arUser) {
-            echo $arUser['email'].PHP_EOL;
             if (strtoupper($arUser['email']) === strtoupper($userLogin)) {
                 $userId = $arUser['id'];
             }
