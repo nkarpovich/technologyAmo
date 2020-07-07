@@ -278,11 +278,13 @@ class Lead extends BaseAmoEntity
 
         //Находим id ответственного пользователя для нового контакта и лида. Пользователь - это сущность User.
         if ($this->dataFromXml['ПочтаМенеджера']) {
+            echo $this->dataFromXml['ПочтаМенеджера'].PHP_EOL;
             $responsibleUserId = $User->getIdByLogin($this->dataFromXml['ПочтаМенеджера']);
         }
 
         //Устанавливаем ответственного
         if ($responsibleUserId) {
+            echo 'ID ответственного менеджера '.$responsibleUserId.PHP_EOL;
             $LeadModel->setResponsibleUserId($responsibleUserId);
         }
 
