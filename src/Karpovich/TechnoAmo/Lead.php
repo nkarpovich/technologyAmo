@@ -304,7 +304,7 @@ class Lead extends BaseAmoEntity
         }
 
         //Устанавливаем имя лида
-        $LeadModel->setName('Тестовая сделка - ' . $this->dataFromXml['GUID']);
+        $LeadModel->setName('Сделка ' . $this->dataFromXml['GUID']);
 
         //Устанавливаем стоимость
         if ($this->dataFromXml['Бюджет']) {
