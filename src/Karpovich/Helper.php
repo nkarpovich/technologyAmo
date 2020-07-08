@@ -66,6 +66,6 @@ class Helper
 
     public static function formatInt(string $param)
     {
-        return (int)preg_replace('/[^0-9]/', '', $param);
+        return (int)str_replace(' ', '', $param);
     }
 }
