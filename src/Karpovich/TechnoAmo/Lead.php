@@ -292,6 +292,9 @@ class Lead extends BaseAmoEntity
         //Устанавливаем имя лида
         $LeadModel->setName('Сделка ' . $this->dataFromXml['Телефон']);
 
+        //Костыль - устанавливаем LossReason в null, иначе Амо иногда выкидивает ошибку.
+        $LeadModel->setLossReasonId(null);
+
         //Устанавливаем стоимость
         if ($this->dataFromXml['Бюджет']) {
             $price = Helper::formatInt($this->dataFromXml['Бюджет']);
