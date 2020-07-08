@@ -28,7 +28,10 @@ class Contact extends BaseAmoEntity
     public function getIdByPhone(string $phone)
     {
         $filter = new ContactsFilter();
-        $filter->setCustomFieldsValues([91611 => $phone]);
+        $phone = preg_replace('/[^0-9]/im', '', $phone);
+//        $filter->setCustomFieldsValues([91611 => $phone]);
+        $filter->setQuery($phone);
+        $filter->setLimit(1);
         //Получим сделки по фильтру
         try {
             $contacts = $this->apiClient->contacts()->get($filter);
@@ -41,6 +44,7 @@ class Contact extends BaseAmoEntity
         if (!$contacts->isEmpty()) {
             $Contact = $contacts->first()->toArray();
             return $Contact['id'];
+
         }
         return false;
     }
