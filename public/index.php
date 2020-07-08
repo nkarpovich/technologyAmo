@@ -38,9 +38,7 @@ if ($arFiles) {
             $leadGUID = Helper::xmlAttributeToString($xml, 'GUID');
             try {
                 if ($leadId) {
-                    //Ищем лид по ID
                     $leadId = Helper::formatInt($leadId);
-                    $lead = $apiClient->leads()->getOne($leadId);
                 } elseif ($leadGUID) {
                     //Ищем лид по GUID
                     $filter = new LeadsFilter();
@@ -56,7 +54,6 @@ if ($arFiles) {
                         if ($e->getCode() != '204') {
                             $log->error($e->getMessage());
                             ErrorPrinter::printError($e);
-                            die;
                         } else {
                             $leadId = false;
                         }
@@ -83,7 +80,6 @@ if ($arFiles) {
                         $log->error($e->getMessage());
                         ErrorPrinter::printError($e);
                         continue;
-//                        die;
                     }
                 } else {
                     try {
@@ -92,7 +88,6 @@ if ($arFiles) {
                         $log->error($e->getMessage());
                         ErrorPrinter::printError($e);
                         continue;
-//                        die;
                     } catch (BaseAmoEntityException $e) {
                         echo $e->getMessage();
                         continue;
@@ -102,7 +97,6 @@ if ($arFiles) {
                 $log->error($e->getMessage());
                 ErrorPrinter::printError($e);
                 continue;
-//                die;
             }
         } else {
             $log->error('Не удалось открыть файл ' . $fileName);

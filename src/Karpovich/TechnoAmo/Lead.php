@@ -10,22 +10,12 @@ use AmoCRM\Collections\TagsCollection;
 use AmoCRM\Exceptions\AmoCRMApiException;
 use AmoCRM\Exceptions\AmoCRMoAuthApiException;
 use AmoCRM\Helpers\EntityTypesInterface;
-use AmoCRM\Models\CustomFieldsValues\NumericCustomFieldValuesModel;
-use AmoCRM\Models\CustomFieldsValues\TextCustomFieldValuesModel;
-use AmoCRM\Models\CustomFieldsValues\ValueCollections\NullCustomFieldValueCollection;
-use AmoCRM\Models\CustomFieldsValues\ValueCollections\NumericCustomFieldValueCollection;
-use AmoCRM\Models\CustomFieldsValues\ValueCollections\TextCustomFieldValueCollection;
 use AmoCRM\Models\CustomFieldsValues\ValueCollections\UrlCustomFieldValueCollection;
-use AmoCRM\Models\CustomFieldsValues\ValueModels\NumericCustomFieldValueModel;
-use AmoCRM\Models\CustomFieldsValues\ValueModels\TextCustomFieldValueModel;
 use AmoCRM\Models\CustomFieldsValues\ValueModels\UrlCustomFieldValueModel;
 use AmoCRM\Models\LeadModel;
 use AmoCRM\Models\TagModel;
-use AmoCRM\OAuth2\Client\Provider\AmoCRMException;
 use Karpovich\Helper;
 use SimpleXMLElement;
-use Symfony\Component\VarDumper\VarDumper;
-use function GuzzleHttp\Psr7\str;
 
 class Lead extends BaseAmoEntity
 {
@@ -37,7 +27,7 @@ class Lead extends BaseAmoEntity
     /**
      * ID полей дат платежей
      */
-    const PAYMENT_DATES__DATE__FIELDS_ID = [
+    /*const PAYMENT_DATES__DATE__FIELDS_ID = [
         1 => 501317,
         2 => 501323,
         3 => 501331,
@@ -46,7 +36,7 @@ class Lead extends BaseAmoEntity
         6 => 580943,
         7 => 580947,
         8 => 651719,
-    ];
+    ];*/
     /**
      * ID полей платежей
      */
@@ -168,7 +158,7 @@ class Lead extends BaseAmoEntity
      */
     public function create()
     {
-        echo 'creating in process...' . PHP_EOL;
+        echo 'creation started...' . PHP_EOL;
         $responsibleUserId = null;
 
         //Создаем новый лид
@@ -249,8 +239,6 @@ class Lead extends BaseAmoEntity
      * Привязать контакт к лиду
      * @param LeadModel $LeadModel
      * @param int $contactId
-     * @throws AmoCRMApiException
-     * @throws AmoCRMoAuthApiException
      */
     public function attachContactToLead(LeadModel $LeadModel, int $contactId): void
     {
@@ -278,13 +266,11 @@ class Lead extends BaseAmoEntity
 
         //Находим id ответственного пользователя для нового контакта и лида. Пользователь - это сущность User.
         if ($this->dataFromXml['ПочтаМенеджера']) {
-            echo $this->dataFromXml['ПочтаМенеджера'].PHP_EOL;
             $responsibleUserId = $User->getIdByLogin($this->dataFromXml['ПочтаМенеджера']);
         }
 
         //Устанавливаем ответственного
         if ($responsibleUserId) {
-            echo 'ID ответственного менеджера '.$responsibleUserId.PHP_EOL;
             $LeadModel->setResponsibleUserId($responsibleUserId);
         }
 
@@ -468,7 +454,7 @@ class Lead extends BaseAmoEntity
         //смотрим есть ли оплаты
             for ($i = 1; $i <= 8; $i++) {
                 $amountFieldId = self::PAYMENT__NUMERIC__FIELDS_ID[$i];
-                $dateFieldId = self::PAYMENT_DATES__DATE__FIELDS_ID[$i];
+//                $dateFieldId = self::PAYMENT_DATES__DATE__FIELDS_ID[$i];
                 $amountField = $leadCustomFieldsValuesCollection->getBy('fieldId', $amountFieldId);
                 if (!empty($amountField)) {
                     //Поле платежа уже заполнено у лида, переходим к следующему полю платежа

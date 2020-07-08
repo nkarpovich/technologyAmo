@@ -53,7 +53,8 @@ class Contact extends BaseAmoEntity
      * @param string $card
      * @return int|null id созданного контакта|null
      */
-    public function create(string $phone, string $name = '', string $birthDate = '', string $card = ''): ?int
+    public function create(string $phone, string $name = 'default name', string $birthDate = '', string $card = ''):
+    ?int
     {
         $contact = new ContactModel();
 

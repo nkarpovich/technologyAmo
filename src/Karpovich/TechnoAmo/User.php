@@ -29,7 +29,7 @@ class User extends BaseAmoEntity
         } catch (AmoCRMApiException $e) {
             ErrorPrinter::printError($e);
         }
-        if ($arUsers) {
+        if (isset($arUsers)) {
             foreach ($arUsers as $arUser) {
                 if (strtoupper($arUser['email']) === strtoupper($userLogin)) {
                     $userId = $arUser['id'];
