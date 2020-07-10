@@ -391,7 +391,7 @@ class Lead extends BaseAmoEntity
             $this->setTextCustomField(
                 $leadCustomFieldsValuesCollection,
                 self::INNER_PRICE__TEXT__FIELD_ID,
-                $price = $this->dataFromXml['Себестоимость']
+                Helper::formatInt($this->dataFromXml['Себестоимость'])
             );
         }
         if ($this->dataFromXml['ДатаИВремяВстречи']) {
