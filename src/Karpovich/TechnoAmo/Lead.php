@@ -162,33 +162,33 @@ class Lead extends BaseAmoEntity
         $responsibleUserId = null;
 
         //Создаем новый лид
-        $LeadModel = new LeadModel();
+        $leadModel = new LeadModel();
 
         //Устанавливаем данные для лида
-        $this->setLeadObjectData($LeadModel);
+        $this->setLeadObjectData($leadModel);
 
         //Устанавливаем теги для лида
-        $TagsCollection = new TagsCollection();
-        $TagModel = new TagModel();
-        $TagModel->setName('Добавлено из 1С');
-        $TagsCollection->add($TagModel);
-        $TagsService = $this->apiClient->tags(EntityTypesInterface::LEADS);
+        $tagsCollection = new TagsCollection();
+        $tagModel = new TagModel();
+        $tagModel->setName('Добавлено из 1С');
+        $tagsCollection->add($tagModel);
+        $tagsService = $this->apiClient->tags(EntityTypesInterface::LEADS);
         try {
-            $TagsService->add($TagsCollection);
+            $tagsService->add($tagsCollection);
         } catch (AmoCRMApiException $e) {
             ErrorPrinter::printError($e);
         }
 
         //Добавляем теги
-        $LeadModel->setTags($TagsCollection);
+        $leadModel->setTags($tagsCollection);
 
         //Добавляем подготовленный лид
         $leadsService = $this->apiClient->leads();
-        $LeadModel = $leadsService->addOne($LeadModel);
+        $leadModel = $leadsService->addOne($leadModel);
 
         //Привязываем контакт к сделке
         if ($this->contactId) {
-            $this->attachContactToLead($LeadModel, $this->contactId);
+            $this->attachContactToLead($leadModel, $this->contactId);
         }
     }
 
@@ -202,26 +202,26 @@ class Lead extends BaseAmoEntity
     {
         echo 'updating ' . $leadId . PHP_EOL;
         //Получим сделку
-        $LeadModel = $this->apiClient->leads()->getOne($leadId);
+        $leadModel = $this->apiClient->leads()->getOne($leadId);
 
-        $this->setLeadObjectData($LeadModel);
+        $this->setLeadObjectData($leadModel);
 
-        $TagsCollection = new TagsCollection();
-        $TagModel = new TagModel();
-        $TagModel->setName('Обновлено из 1С');
-        $TagsCollection->add($TagModel);
-        $TagsService = $this->apiClient->tags(EntityTypesInterface::LEADS);
-        $TagsService->add($TagsCollection);
+        $tagsCollection = $leadModel->getTags();
+        $tagModel = new TagModel();
+        $tagModel->setName('Обновлено из 1С');
+        $tagsCollection->add($tagModel);
+        /*$tagsService = $this->apiClient->tags(EntityTypesInterface::LEADS);
+        $tagsService->add($tagsCollection);*/
 
         //Добавляем теги
-        $LeadModel->setTags($TagsCollection);
+        $leadModel->setTags($tagsCollection);
 
         //Обновляем подготовленный лид
-        $this->apiClient->leads()->updateOne($LeadModel);
+        $this->apiClient->leads()->updateOne($leadModel);
 
         //Привязываем контакт к сделке
         if ($this->contactId) {
-            $this->attachContactToLead($LeadModel, $this->contactId);
+            $this->attachContactToLead($leadModel, $this->contactId);
         }
     }
 
@@ -234,26 +234,26 @@ class Lead extends BaseAmoEntity
     public function updatePayment(int $leadId)
     {
         //Получим сделку
-        $LeadModel = $this->apiClient->leads()->getOne($leadId);
+        $leadModel = $this->apiClient->leads()->getOne($leadId);
 
-        $this->setLeadObjectDataPayment($LeadModel);
+        $this->setLeadObjectDataPayment($leadModel);
 
         //Обновляем подготовленный лид
-        $this->apiClient->leads()->updateOne($LeadModel);
+        $this->apiClient->leads()->updateOne($leadModel);
     }
 
     /**
      * Привязать контакт к лиду
-     * @param LeadModel $LeadModel
+     * @param LeadModel $leadModel
      * @param int $contactId
      */
-    public function attachContactToLead(LeadModel $LeadModel, int $contactId): void
+    public function attachContactToLead(LeadModel $leadModel, int $contactId): void
     {
         try {
             $contact = $this->apiClient->contacts()->getOne($contactId);
             $links = new LinksCollection();
             $links->add($contact);
-            $this->apiClient->leads()->link($LeadModel, $links);
+            $this->apiClient->leads()->link($leadModel, $links);
         } catch (AmoCRMApiException $e) {
             ErrorPrinter::printError($e);
         }
@@ -261,10 +261,10 @@ class Lead extends BaseAmoEntity
 
     /**
      * Наполнить лид данными
-     * @param LeadModel $LeadModel
+     * @param LeadModel $leadModel
      * @throws Exceptions\BaseAmoEntityException
      */
-    public function setLeadObjectData(LeadModel $LeadModel)
+    public function setLeadObjectData(LeadModel $leadModel)
     {
         $responsibleUserId = null;
         $User = new User($this->apiClient);
@@ -278,10 +278,10 @@ class Lead extends BaseAmoEntity
 
         //Устанавливаем ответственного
         if ($responsibleUserId) {
-            $LeadModel->setResponsibleUserId($responsibleUserId);
+            $leadModel->setResponsibleUserId($responsibleUserId);
         }
 
-        $LeadModel->setUpdatedAt(time());
+        $leadModel->setUpdatedAt(time());
 
         //Находим id клиента по номеру телефона для нового лида. Клиент - это сущность Contact.
         if ($this->dataFromXml['Телефон']) {
@@ -297,15 +297,15 @@ class Lead extends BaseAmoEntity
         }
 
         //Устанавливаем имя лида
-        $LeadModel->setName('Сделка ' . $this->dataFromXml['Телефон']);
+        $leadModel->setName('Сделка ' . $this->dataFromXml['Телефон']);
 
         //Костыль - устанавливаем LossReason в null, иначе Амо иногда выкидивает ошибку.
-        $LeadModel->setLossReasonId(null);
+        $leadModel->setLossReasonId(null);
 
         //Устанавливаем стоимость
         if ($this->dataFromXml['Бюджет']) {
             $price = Helper::formatInt($this->dataFromXml['Бюджет']);
-            $LeadModel->setPrice($price);
+            $leadModel->setPrice($price);
         }
 
         //Устанавливаем кастомные свойства лида
@@ -419,15 +419,15 @@ class Lead extends BaseAmoEntity
             $this->setNumericCustomField($leadCustomFieldsValuesCollection, self::BUILDING_END__DATE__FIELD_ID, $date);
         }
 
-        $LeadModel->setCustomFieldsValues($leadCustomFieldsValuesCollection);
+        $leadModel->setCustomFieldsValues($leadCustomFieldsValuesCollection);
     }
 
     /**
      * Проверяем оплаты - находим последнюю свободную ячейку для оплаты. В нее записываем оплату.
      * Если оплат раньше не было - меняем статус у лида на 'Внесена предоплата'.
-     * @param LeadModel $LeadModel
+     * @param LeadModel $leadModel
      */
-    public function setLeadObjectDataPayment(LeadModel $LeadModel)
+    public function setLeadObjectDataPayment(LeadModel $leadModel)
     {
 
         //Флаг, есть ли оплаты у лида
@@ -437,7 +437,7 @@ class Lead extends BaseAmoEntity
         $numOfLastPayment = null;
 
         //Получаем кастомные свойства лида
-        $leadCustomFieldsValuesCollection = $LeadModel->getCustomFieldsValues();
+        $leadCustomFieldsValuesCollection = $leadModel->getCustomFieldsValues();
 
         //Хак - в Amo URL хранятся с пробельными символами, если в таком же виде отправить назад - будет ошибка.
         //Заменяем пробелы на соответствующий символ %20. Urlencode не использовал, потому что шаблон ссылок везде
@@ -501,13 +501,13 @@ class Lead extends BaseAmoEntity
         }
         if (!$hasPayments) {
             //Оплат еще не было - переводим в статус 'Внесена предоплата'
-            $LeadModel->setStatusId(self::PREPAYMENT_STATUS);
+            $leadModel->setStatusId(self::PREPAYMENT_STATUS);
         }
 
         //Установим время апдейта
-        $LeadModel->setUpdatedAt(time());
+        $leadModel->setUpdatedAt(time());
 
         //Сохраняем кастомные свойства у лида
-        $LeadModel->setCustomFieldsValues($leadCustomFieldsValuesCollection);
+        $leadModel->setCustomFieldsValues($leadCustomFieldsValuesCollection);
     }
 }
