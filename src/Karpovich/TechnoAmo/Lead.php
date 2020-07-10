@@ -178,6 +178,10 @@ class Lead extends BaseAmoEntity
         } catch (AmoCRMApiException $e) {
             ErrorPrinter::printError($e);
         }
+
+        //Добавляем теги
+        $LeadModel->setTags($TagsCollection);
+
         //Добавляем подготовленный лид
         $leadsService = $this->apiClient->leads();
         $LeadModel = $leadsService->addOne($LeadModel);
@@ -388,7 +392,7 @@ class Lead extends BaseAmoEntity
             );
         }
         if ($this->dataFromXml['ДатаИВремяВстречи']) {
-            if ('01.01.0001 0:00:00' !== dataFromXml['ДатаИВремяВстречи']) {
+            if ('01.01.0001 0:00:00' !== $this->dataFromXml['ДатаИВремяВстречи']) {
                 $dateStart = substr($this->dataFromXml['ДатаИВремяВстречи'], 0, 10);
                 $datetime = explode(".", $dateStart);
                 $date = mktime(0, 0, 0, $datetime[1], $datetime[0], $datetime[2]);
