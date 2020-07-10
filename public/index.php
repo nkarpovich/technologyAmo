@@ -63,8 +63,9 @@ if ($arFiles) {
                     die('Не указаны обязательные параметры: ID сделки из АМО или GUID из 1С');
                 }
 
-                //Лид не найден
+
                 if (!$leadId) {
+                    //Лид не найден
                     try {
                         $log->info('creating new Lead GUID '.$leadGUID.PHP_EOL);
                         echo 'creating new Lead GUID '.$leadGUID.PHP_EOL;
@@ -82,6 +83,7 @@ if ($arFiles) {
                         continue;
                     }
                 } else {
+                    //Лид найден
                     try {
                         $Lead->update($leadId);
                     } catch (AmoCRMApiException $e) {

@@ -388,10 +388,12 @@ class Lead extends BaseAmoEntity
             );
         }
         if ($this->dataFromXml['ДатаИВремяВстречи']) {
-            $dateStart = substr($this->dataFromXml['ДатаИВремяВстречи'], 0, 10);
-            $datetime = explode(".", $dateStart);
-            $date = mktime(0, 0, 0, $datetime[1], $datetime[0], $datetime[2]);
-            $this->setNumericCustomField($leadCustomFieldsValuesCollection, self::MEETING__DATE__FIELD_ID, $date);
+            if ('01.01.0001 0:00:00' !== dataFromXml['ДатаИВремяВстречи']) {
+                $dateStart = substr($this->dataFromXml['ДатаИВремяВстречи'], 0, 10);
+                $datetime = explode(".", $dateStart);
+                $date = mktime(0, 0, 0, $datetime[1], $datetime[0], $datetime[2]);
+                $this->setNumericCustomField($leadCustomFieldsValuesCollection, self::MEETING__DATE__FIELD_ID, $date);
+            }
         }
         if ($this->dataFromXml['ДатаНачалаМонтажа']) {
             $dateStart = substr($this->dataFromXml['ДатаНачалаМонтажа'], 0, 10);
