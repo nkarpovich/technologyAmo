@@ -213,6 +213,9 @@ class Lead extends BaseAmoEntity
         $TagsService = $this->apiClient->tags(EntityTypesInterface::LEADS);
         $TagsService->add($TagsCollection);
 
+        //Добавляем теги
+        $LeadModel->setTags($TagsCollection);
+
         //Обновляем подготовленный лид
         $this->apiClient->leads()->updateOne($LeadModel);
 
