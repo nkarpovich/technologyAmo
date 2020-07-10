@@ -1,9 +1,10 @@
 <?php
-require_once '../public/bootstrap.php';
+require_once __DIR__.'/../public/bootstrap.php';
 
 use AmoCRM\Filters\LeadsFilter;
 use AmoCRM\Exceptions\AmoCRMApiException;
 use Karpovich\TechnoAmo\ErrorPrinter;
+use Karpovich\TechnoAmo\Exceptions\BaseAmoEntityException;
 use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
 use Symfony\Component\Filesystem\Exception\IOExceptionInterface;
@@ -18,11 +19,15 @@ $filesystem = new Filesystem();
 $log = new Logger('leads');
 $log->pushHandler(new StreamHandler(__DIR__.'/../logs/leads.log', Logger::INFO));
 
+//Устанавливаем токен для доступа к API
 Token::setAccessToken($apiClient, $clientAuth, $log, $pathToTokenFile);
 
 $log->info('Start '.date('d.m.Y H:i:s').PHP_EOL);
+
 //Получаем все файлы лидов, прилетевших из 1С
 $arFiles = Helper::scanDir($pathToLeadsXml);
+//echo $pathToLeadsXml;
+//var_dump($arFiles);
 if ($arFiles) {
     foreach ($arFiles as $file) {
         $fileName = $pathToLeadsXml . $file;
@@ -33,9 +38,7 @@ if ($arFiles) {
             $leadGUID = Helper::xmlAttributeToString($xml, 'GUID');
             try {
                 if ($leadId) {
-                    //Ищем лид по ID
-                    $leadId = preg_replace('/[^0-9]/', '', $leadId);
-                    $lead = $apiClient->leads()->getOne($leadId);
+                    $leadId = Helper::formatInt($leadId);
                 } elseif ($leadGUID) {
                     //Ищем лид по GUID
                     $filter = new LeadsFilter();
@@ -44,7 +47,6 @@ if ($arFiles) {
                     try {
                         $leadsCollection = $apiClient->leads()->get($filter);
                         if (!$leadsCollection->isEmpty()) {
-                            //                        \Symfony\Component\VarDumper\VarDumper::dump($leadsCollection->toArray());
                             $lead = $leadsCollection->first();
                         }
                         $leadId = $lead->getId();
@@ -52,7 +54,6 @@ if ($arFiles) {
                         if ($e->getCode() != '204') {
                             $log->error($e->getMessage());
                             ErrorPrinter::printError($e);
-                            die;
                         } else {
                             $leadId = false;
                         }
@@ -62,36 +63,48 @@ if ($arFiles) {
                     die('Не указаны обязательные параметры: ID сделки из АМО или GUID из 1С');
                 }
 
-                //Лид не найден
+
                 if (!$leadId) {
+                    //Лид не найден
                     try {
                         $log->info('creating new Lead GUID '.$leadGUID.PHP_EOL);
                         echo 'creating new Lead GUID '.$leadGUID.PHP_EOL;
-                        $Lead->create();
+                        try {
+                            $Lead->create();
+                            echo 'creation completed' . PHP_EOL;
+                        } catch (BaseAmoEntityException $e) {
+                            $log->error($e->getMessage());
+                            echo $e->getMessage();
+                            continue;
+                        }
                     } catch (AmoCRMApiException $e) {
                         $log->error($e->getMessage());
                         ErrorPrinter::printError($e);
-                        die;
+                        continue;
                     }
                 } else {
+                    //Лид найден
                     try {
                         $Lead->update($leadId);
                     } catch (AmoCRMApiException $e) {
                         $log->error($e->getMessage());
                         ErrorPrinter::printError($e);
-                        die;
+                        continue;
+                    } catch (BaseAmoEntityException $e) {
+                        echo $e->getMessage();
+                        continue;
                     }
                 }
             } catch (AmoCRMApiException $e) {
                 $log->error($e->getMessage());
                 ErrorPrinter::printError($e);
-                die;
+                continue;
             }
         } else {
             $log->error('Не удалось открыть файл ' . $fileName);
         }
         try {
-            $filesystem->rename($fileName, $pathToOldLeadsXml . $file);
+            $filesystem->rename($fileName, $pathToOldLeadsXml . $file, true);
         } catch (IOExceptionInterface $exception) {
             $log->error("An error occurred while renaming your file at " . $exception->getPath());
             echo "An error occurred while renaming your file at " . $exception->getPath();

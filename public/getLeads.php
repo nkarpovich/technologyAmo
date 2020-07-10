@@ -1,5 +1,5 @@
 <?php
-require_once '../public/bootstrap.php';
+require_once __DIR__.'/../public/bootstrap.php';
 
 use AmoCRM\Filters\LeadsFilter;
 use AmoCRM\Exceptions\AmoCRMApiException;
@@ -25,6 +25,9 @@ try {
     $filter = new LeadsFilter();
     $xml = new SimpleXMLElement('<xml/>');
     for ($i = 8; $i < 1000; $i++) {
+        /*if ($i===8) {
+            continue;
+        }*/
         //Максимум - 250
         $filter->setLimit(250);
         $filter->setPage($i);
@@ -60,10 +63,10 @@ try {
                     if ($customFields) {
                         //Получим значение поля по его коду
                         $phoneField = $customFields->getBy('fieldCode', 'PHONE');
+
                         if ($phoneField) {
                             $phone = $phoneField->getValues()->first()->value;
                             $leadXml->addChild('phone', $phone);
-//                            \Symfony\Component\VarDumper\VarDumper::dump($phone);
                         }
                     }
                     $name = $contact->getName();
@@ -71,7 +74,6 @@ try {
                         $leadXml->addChild('name', $name);
                     }
                 }
-//                echo $leadXml->asXML();
                 $leadsIterator->next();
             }
         }

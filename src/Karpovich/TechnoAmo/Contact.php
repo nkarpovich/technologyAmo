@@ -28,17 +28,23 @@ class Contact extends BaseAmoEntity
     public function getIdByPhone(string $phone)
     {
         $filter = new ContactsFilter();
-        $filter->setCustomFieldsValues([91611 => $phone]);
+        $phone = preg_replace('/[^0-9]/im', '', $phone);
+//        $filter->setCustomFieldsValues([91611 => $phone]);
+        $filter->setQuery($phone);
+        $filter->setLimit(1);
         //Получим сделки по фильтру
         try {
             $contacts = $this->apiClient->contacts()->get($filter);
         } catch (AmoCRMApiException $e) {
-            ErrorPrinter::printError($e);
-            die;
+//            ErrorPrinter::printError($e);
+            if ($e->getCode() == 204) {
+                return false;
+            }
         }
         if (!$contacts->isEmpty()) {
             $Contact = $contacts->first()->toArray();
             return $Contact['id'];
+
         }
         return false;
     }
@@ -51,7 +57,8 @@ class Contact extends BaseAmoEntity
      * @param string $card
      * @return int|null id созданного контакта|null
      */
-    public function create(string $phone, string $name = '', string $birthDate = '', string $card = ''): ?int
+    public function create(string $phone, string $name = 'default name', string $birthDate = '', string $card = ''):
+    ?int
     {
         $contact = new ContactModel();
 
@@ -69,7 +76,10 @@ class Contact extends BaseAmoEntity
             $this->setTextCustomField($contactCustomFieldsValues, self::PHONE__FIELD_ID, $phone);
         }
         if ($birthDate) {
-            $this->setTextCustomField($contactCustomFieldsValues, self::CARD__FIELD_ID, $birthDate);
+            $d = substr($birthDate, 0, 10);
+            $datetime = explode(".", $d);
+            $date = mktime(0, 0, 0, $datetime[1], $datetime[0], $datetime[2]);
+            $this->setNumericCustomField($contactCustomFieldsValues, self::CARD__FIELD_ID, $date);
         }
         if ($card) {
             $this->setTextCustomField($contactCustomFieldsValues, self::BIRTH_DATE__FIELD_ID, $card);

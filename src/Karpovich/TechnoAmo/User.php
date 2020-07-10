@@ -18,9 +18,9 @@ class User extends BaseAmoEntity
      * @param string $userLogin
      * @return bool|mixed
      */
-    public function getIdByLogin(string $userLogin)
+    public function getIdByLogin(string $userLogin):?int
     {
-        $userId = false;
+        $userId = null;
         //Получаем и обходим всех пользователей аккаунта (фильтр по пользователям в AMO, к сожалению, не реализован)
         $usersService = $this->apiClient->users();
         try {
@@ -28,11 +28,12 @@ class User extends BaseAmoEntity
             $arUsers = $usersCollection->toArray();
         } catch (AmoCRMApiException $e) {
             ErrorPrinter::printError($e);
-            die;
         }
-        foreach ($arUsers as $arUser) {
-            if ($arUser['email'] === $userLogin) {
-                $userId = $arUser['id'];
+        if (isset($arUsers)) {
+            foreach ($arUsers as $arUser) {
+                if (strtoupper($arUser['email']) === strtoupper($userLogin)) {
+                    $userId = $arUser['id'];
+                }
             }
         }
         return $userId;
