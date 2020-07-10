@@ -353,7 +353,7 @@ class Lead extends BaseAmoEntity
             $this->setTextCustomField(
                 $leadCustomFieldsValuesCollection,
                 self::EFFICIENCY__TEXT__FIELD_ID,
-                $this->dataFromXml['Эффективность']
+                Helper::formatInt($this->dataFromXml['Эффективность'])
             );
         }
         if ($this->dataFromXml['ФормаОплаты']) {
