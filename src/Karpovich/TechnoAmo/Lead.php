@@ -75,7 +75,7 @@ class Lead extends BaseAmoEntity
     /**
      * Варианты оплаты
      */
-//    const PAYMENT_VARIANT__CHECKBOX__FIELD_ID = 268455;
+    //    const PAYMENT_VARIANT__CHECKBOX__FIELD_ID = 268455;
     /**
      * Источник
      */
@@ -202,26 +202,30 @@ class Lead extends BaseAmoEntity
     {
         echo 'updating ' . $leadId . PHP_EOL;
         //Получим сделку
-        $leadModel = $this->apiClient->leads()->getOne($leadId);
 
-        $this->setLeadObjectData($leadModel);
+        try {
+            $leadModel = $this->apiClient->leads()->getOne($leadId);
+            $this->setLeadObjectData($leadModel);
 
-        $tagsCollection = $leadModel->getTags();
-        $tagModel = new TagModel();
-        $tagModel->setName('Обновлено из 1С');
-        $tagsCollection->add($tagModel);
-        /*$tagsService = $this->apiClient->tags(EntityTypesInterface::LEADS);
-        $tagsService->add($tagsCollection);*/
+            $tagsCollection = $leadModel->getTags();
+            $tagModel = new TagModel();
+            $tagModel->setName('Обновлено из 1С');
+            $tagsCollection->add($tagModel);
+            /*$tagsService = $this->apiClient->tags(EntityTypesInterface::LEADS);
+            $tagsService->add($tagsCollection);*/
 
-        //Добавляем теги
-        $leadModel->setTags($tagsCollection);
+            //Добавляем теги
+            $leadModel->setTags($tagsCollection);
 
-        //Обновляем подготовленный лид
-        $this->apiClient->leads()->updateOne($leadModel);
+            //Обновляем подготовленный лид
+            $this->apiClient->leads()->updateOne($leadModel);
 
-        //Привязываем контакт к сделке
-        if ($this->contactId) {
-            $this->attachContactToLead($leadModel, $this->contactId);
+            //Привязываем контакт к сделке
+            if ($this->contactId) {
+                $this->attachContactToLead($leadModel, $this->contactId);
+            }
+        } catch (\Exception  $e) {
+            echo  $e->getTraceAsString();
         }
     }
 
@@ -462,11 +466,10 @@ class Lead extends BaseAmoEntity
             }
 
 
-
-        //смотрим есть ли оплаты
+            //смотрим есть ли оплаты
             for ($i = 1; $i <= 8; $i++) {
                 $amountFieldId = self::PAYMENT__NUMERIC__FIELDS_ID[$i];
-//                $dateFieldId = self::PAYMENT_DATES__DATE__FIELDS_ID[$i];
+                //                $dateFieldId = self::PAYMENT_DATES__DATE__FIELDS_ID[$i];
                 $amountField = $leadCustomFieldsValuesCollection->getBy('fieldId', $amountFieldId);
                 if (!empty($amountField)) {
                     //Поле платежа уже заполнено у лида, переходим к следующему полю платежа
@@ -485,7 +488,7 @@ class Lead extends BaseAmoEntity
                             Helper::formatInt($this->dataFromXml['Summa'])
                         );
                     }
-                    if ($this->dataFromXml['DataPlatezha'] && strlen($this->dataFromXml['DataPlatezha'])>3) {
+                    if ($this->dataFromXml['DataPlatezha'] && strlen($this->dataFromXml['DataPlatezha']) > 3) {
                         $payDate = substr($this->dataFromXml['DataPlatezha'], 0, 10);
                         $datetime = explode(".", $payDate);
                         $date = mktime(0, 0, 0, $datetime[1], $datetime[0], $datetime[2]);
