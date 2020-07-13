@@ -35,17 +35,18 @@ class Contact extends BaseAmoEntity
         //Получим сделки по фильтру
         try {
             $contacts = $this->apiClient->contacts()->get($filter);
+            if (!$contacts->isEmpty()) {
+                $Contact = $contacts->first()->toArray();
+                return $Contact['id'];
+
+            }
         } catch (AmoCRMApiException $e) {
 //            ErrorPrinter::printError($e);
             if ($e->getCode() == 204) {
                 return false;
             }
         }
-        if (!$contacts->isEmpty()) {
-            $Contact = $contacts->first()->toArray();
-            return $Contact['id'];
 
-        }
         return false;
     }
 
