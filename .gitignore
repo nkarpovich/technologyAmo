@@ -3,6 +3,6 @@ vendor/
 resources/
 *.log
 public/test.php
-config/.prod.en
+config/.prod.env
 config/token_info.json
 logs
