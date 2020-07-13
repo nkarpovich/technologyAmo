@@ -16,6 +16,7 @@ use AmoCRM\Models\LeadModel;
 use AmoCRM\Models\TagModel;
 use Karpovich\Helper;
 use SimpleXMLElement;
+use Symfony\Component\VarDumper\VarDumper;
 
 class Lead extends BaseAmoEntity
 {
@@ -207,18 +208,18 @@ class Lead extends BaseAmoEntity
             $leadModel = $this->apiClient->leads()->getOne($leadId);
             $this->setLeadObjectData($leadModel);
 
-            $tagsCollection = $leadModel->getTags();
-            $tagModel = new TagModel();
-            $tagModel->setName('Обновлено из 1С');
-            $tagsCollection->add($tagModel);
+//            $tagsCollection = $leadModel->getTags();
+//            $tagModel = new TagModel();
+//            $tagModel->setName('Обновлено из 1С');
+//            $tagsCollection->add($tagModel);
             /*$tagsService = $this->apiClient->tags(EntityTypesInterface::LEADS);
             $tagsService->add($tagsCollection);*/
 
             //Добавляем теги
-            $leadModel->setTags($tagsCollection);
+//            $leadModel->setTags($tagsCollection);
 
             //Обновляем подготовленный лид
-            $this->apiClient->leads()->updateOne($leadModel);
+//            $this->apiClient->leads()->updateOne($leadModel);
 
             //Привязываем контакт к сделке
             if ($this->contactId) {
