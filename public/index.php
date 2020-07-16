@@ -26,8 +26,6 @@ $log->info('Start '.date('d.m.Y H:i:s').PHP_EOL);
 
 //Получаем все файлы лидов, прилетевших из 1С
 $arFiles = Helper::scanDir($pathToLeadsXml);
-//echo $pathToLeadsXml;
-//var_dump($arFiles);
 if ($arFiles) {
     foreach ($arFiles as $file) {
         $fileName = $pathToLeadsXml . $file;
@@ -71,6 +69,7 @@ if ($arFiles) {
                         echo 'creating new Lead GUID '.$leadGUID.PHP_EOL;
                         try {
                             $Lead->create();
+                            $log->info('creation completed'.PHP_EOL);
                             echo 'creation completed' . PHP_EOL;
                         } catch (BaseAmoEntityException $e) {
                             $log->error($e->getMessage());
@@ -84,6 +83,8 @@ if ($arFiles) {
                     }
                 } else {
                     //Лид найден
+                    $log->info('updating Lead ID '.$leadId.PHP_EOL);
+                    echo 'updating Lead ID '.$leadId.PHP_EOL;
                     try {
                         $Lead->update($leadId);
                     } catch (AmoCRMApiException $e) {
@@ -94,6 +95,8 @@ if ($arFiles) {
                         echo $e->getMessage();
                         continue;
                     }
+                    $log->info('update completed'.PHP_EOL);
+                    echo 'update completed'.PHP_EOL;
                 }
             } catch (AmoCRMApiException $e) {
                 $log->error($e->getMessage());

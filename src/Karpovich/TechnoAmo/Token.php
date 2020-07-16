@@ -7,6 +7,7 @@ use League\OAuth2\Client\Token\AccessToken;
 use AmoCRM\Client\AmoCRMApiClient;
 use Exception;
 use Monolog\Logger;
+use Symfony\Component\VarDumper\VarDumper;
 
 /**
  * Методы для работы с токеном
@@ -47,8 +48,9 @@ class Token
         try {
             if ($accessToken->hasExpired()) {
                 try {
+                    echo $accessToken->getRefreshToken();
+                    exit();
                     $accessToken = $apiClient->getOAuthClient()->getAccessTokenByRefreshToken($accessToken);
-
                     self::saveToken(
                         $pathToTokenFile,
                         [
