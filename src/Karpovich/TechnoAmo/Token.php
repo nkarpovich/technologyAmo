@@ -48,8 +48,6 @@ class Token
         try {
             if ($accessToken->hasExpired()) {
                 try {
-                    echo $accessToken->getRefreshToken();
-                    exit();
                     $accessToken = $apiClient->getOAuthClient()->getAccessTokenByRefreshToken($accessToken);
                     self::saveToken(
                         $pathToTokenFile,

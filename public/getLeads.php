@@ -28,6 +28,9 @@ try {
         if ($i===8) {
             continue;
         }
+        /*if ($i===30) {
+            break;
+        }*/
         //Максимум - 250
         $filter->setLimit(250);
         $filter->setPage($i);
@@ -74,6 +77,7 @@ try {
                         $leadXml->addChild('name', $name);
                     }
                 }
+                sleep(0.5);
                 $leadsIterator->next();
             }
         }
