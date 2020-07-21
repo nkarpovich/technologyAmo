@@ -89,10 +89,12 @@ if ($arFiles) {
                         $Lead->update($leadId);
                     } catch (AmoCRMApiException $e) {
                         $log->error($e->getMessage());
+                        echo 'error: '.$e->getMessage();
                         ErrorPrinter::printError($e);
                         continue;
                     } catch (BaseAmoEntityException $e) {
                         echo $e->getMessage();
+                        echo 'error: '.$e->getMessage();
                         continue;
                     }
                     $log->info('update completed'.PHP_EOL);
