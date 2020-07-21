@@ -219,7 +219,7 @@ class Lead extends BaseAmoEntity
 //            $leadModel->setTags($tagsCollection);
 
             //Обновляем подготовленный лид
-//            $this->apiClient->leads()->updateOne($leadModel);
+            $this->apiClient->leads()->updateOne($leadModel);
 
             //Привязываем контакт к сделке
             if ($this->contactId) {
