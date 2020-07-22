@@ -52,7 +52,6 @@ class Token
 
         try {
             $accessToken = $apiClient->getOAuthClient()->getAccessTokenByRefreshToken($accessToken);
-            echo 'saving refreshed token';
             self::saveToken(
                 $pathToTokenFile,
                 [
