@@ -7,7 +7,6 @@ use League\OAuth2\Client\Token\AccessToken;
 use AmoCRM\Client\AmoCRMApiClient;
 use Exception;
 use Monolog\Logger;
-use Symfony\Component\VarDumper\VarDumper;
 
 /**
  * Методы для работы с токеном
@@ -17,13 +16,19 @@ use Symfony\Component\VarDumper\VarDumper;
 class Token
 {
 
+    /**
+     * Получение токена, обновление токена при необходимости
+     * @param AmoCRMApiClient $apiClient
+     * @param string $clientAuth
+     * @param Logger $log
+     * @param string $pathToTokenFile
+     */
     public static function setAccessToken(
         AmoCRMApiClient $apiClient,
         string $clientAuth,
         Logger $log,
         string $pathToTokenFile
     ) {
-        /** Получение токена, обновление токена при необходимости */
         try {
             $accessToken = self::getToken($pathToTokenFile);
         } catch (Exception $e) {
@@ -46,25 +51,23 @@ class Token
         }
 
         try {
-            if ($accessToken->hasExpired()) {
-                try {
-                    $accessToken = $apiClient->getOAuthClient()->getAccessTokenByRefreshToken($accessToken);
-                    self::saveToken(
-                        $pathToTokenFile,
-                        [
-                        'accessToken' => $accessToken->getToken(),
-                        'refreshToken' => $accessToken->getRefreshToken(),
-                        'expires' => $accessToken->getExpires(),
-                        'baseDomain' => $apiClient->getAccountBaseDomain()
-                        ]
-                    );
-                } catch (Exception $e) {
-                    $log->error((string)$e);
-                    die((string)$e);
-                }
-            }
+            $accessToken = $apiClient->getOAuthClient()->getAccessTokenByRefreshToken($accessToken);
+            echo 'saving refreshed token';
+            self::saveToken(
+                $pathToTokenFile,
+                [
+                'accessToken' => $accessToken->getToken(),
+                'refreshToken' => $accessToken->getRefreshToken(),
+                'expires' => $accessToken->getExpires(),
+                'baseDomain' => $apiClient->getAccountBaseDomain()
+                ]
+            );
+            $accessToken = self::getToken($pathToTokenFile);
         } catch (Exception $e) {
+            echo $e->getCode();
             $log->error((string)$e);
+            echo $e->getMessage();
+            echo $e->getTraceAsString();
             die((string)$e);
         }
         $apiClient->setAccessToken($accessToken);
@@ -100,7 +103,7 @@ class Token
      * @return AccessToken
      * @throws Exception
      */
-    public static function getToken($pathToTokenFile)
+    public static function getToken(string $pathToTokenFile)
     {
         if (!file_exists($pathToTokenFile)) {
             throw new Exception('Access token file not found');
