@@ -7,6 +7,7 @@ use AmoCRM\Client\AmoCRMApiClient;
 use AmoCRM\Collections\CustomFieldsValuesCollection;
 use AmoCRM\Models\CustomFieldsValues\CheckboxCustomFieldValuesModel;
 //use AmoCRM\Models\CustomFieldsValues\DateCustomFieldValuesModel;
+use AmoCRM\Models\CustomFieldsValues\DateCustomFieldValuesModel;
 use AmoCRM\Models\CustomFieldsValues\MultiselectCustomFieldValuesModel;
 use AmoCRM\Models\CustomFieldsValues\NumericCustomFieldValuesModel;
 use AmoCRM\Models\CustomFieldsValues\SelectCustomFieldValuesModel;
@@ -14,6 +15,7 @@ use AmoCRM\Models\CustomFieldsValues\TextCustomFieldValuesModel;
 use AmoCRM\Models\CustomFieldsValues\UrlCustomFieldValuesModel;
 use AmoCRM\Models\CustomFieldsValues\ValueCollections\CheckboxCustomFieldValueCollection;
 //use AmoCRM\Models\CustomFieldsValues\ValueCollections\DateCustomFieldValueCollection;
+use AmoCRM\Models\CustomFieldsValues\ValueCollections\DateCustomFieldValueCollection;
 use AmoCRM\Models\CustomFieldsValues\ValueCollections\MultiselectCustomFieldValueCollection;
 use AmoCRM\Models\CustomFieldsValues\ValueCollections\NumericCustomFieldValueCollection;
 use AmoCRM\Models\CustomFieldsValues\ValueCollections\SelectCustomFieldValueCollection;
@@ -21,6 +23,7 @@ use AmoCRM\Models\CustomFieldsValues\ValueCollections\TextCustomFieldValueCollec
 use AmoCRM\Models\CustomFieldsValues\ValueCollections\UrlCustomFieldValueCollection;
 use AmoCRM\Models\CustomFieldsValues\ValueModels\CheckboxCustomFieldValueModel;
 //use AmoCRM\Models\CustomFieldsValues\ValueModels\DateCustomFieldValueModel;
+use AmoCRM\Models\CustomFieldsValues\ValueModels\DateCustomFieldValueModel;
 use AmoCRM\Models\CustomFieldsValues\ValueModels\MultiselectCustomFieldValueModel;
 use AmoCRM\Models\CustomFieldsValues\ValueModels\NumericCustomFieldValueModel;
 use AmoCRM\Models\CustomFieldsValues\ValueModels\SelectCustomFieldValueModel;
@@ -206,17 +209,19 @@ class BaseAmoEntity
      * 'YYY-MM-DD'
      * @param CustomFieldsValuesCollection $customFieldsValuesCollection
      * @param int $fieldId
+     * @param string $value
      */
-    /*public function setDateCustomField(
+    public function setDateCustomField(
         CustomFieldsValuesCollection $customFieldsValuesCollection,
-        int $fieldId
+        int $fieldId,
+        string $value
     ): void {
         $dateCustomFieldValuesModel = new DateCustomFieldValuesModel();
         $dateCustomFieldValuesModel->setFieldId($fieldId);
         $dateCustomFieldValuesModel->setValues(
             (new DateCustomFieldValueCollection())
-                ->add((new DateCustomFieldValueModel())->setValue(time()))
+                ->add((new DateCustomFieldValueModel())->setValue($value))
         );
         $customFieldsValuesCollection->add($dateCustomFieldValuesModel);
-    }*/
+    }
 }

@@ -76,12 +76,13 @@ class Contact extends BaseAmoEntity
         if ($phone) {
             $this->setTextCustomField($contactCustomFieldsValues, self::PHONE__FIELD_ID, $phone);
         }
-        if ($birthDate) {
+        /*if ($birthDate) {
             $d = substr($birthDate, 0, 10);
             $datetime = explode(".", $d);
-            $date = mktime(0, 0, 0, $datetime[1], $datetime[0], $datetime[2]);
-            $this->setNumericCustomField($contactCustomFieldsValues, self::BIRTH_DATE__FIELD_ID, $date);
-        }
+            $date = mktime(3, 0, 0, '10', '10', '1969');
+//            $this->setNumericCustomField($contactCustomFieldsValues, self::BIRTH_DATE__FIELD_ID, $date);
+            $this->setDateCustomField($contactCustomFieldsValues, self::BIRTH_DATE__FIELD_ID, $d);
+        }*/
         if ($card) {
             $this->setTextCustomField($contactCustomFieldsValues, self::CARD__FIELD_ID, $card);
         }

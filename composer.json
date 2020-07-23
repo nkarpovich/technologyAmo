@@ -9,7 +9,7 @@
   "require": {
 
     "symfony/filesystem": "5.1.0",
-    "amocrm/amocrm-api-library": "0.2.3",
+    "amocrm/amocrm-api-library": "0.3.5.*",
     "amocrm/oauth2-amocrm": "2.0.4",
     "monolog/monolog": "2.1.0",
     "ext-simplexml": "*",
