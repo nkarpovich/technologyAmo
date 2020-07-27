@@ -1,6 +1,7 @@
 <?php
 
 use AmoCRM\Client\AmoCRMApiClient;
+use Karpovich\TechnoAmo\Token;
 use Symfony\Component\Dotenv\Dotenv;
 
 include_once __DIR__ . '/../vendor/autoload.php';
@@ -25,4 +26,16 @@ $pathToOldPaymentsXml = $baseDir . $_ENV['PATH_TO_OLD_PAYMENTS_DIR'];
 $pathToExportedLeadsFile = $baseDir . $_ENV['PATH_TO_EXPORTED_LEADS_FROM_AMO'];
 $pathToTokenFile = __DIR__.'/../config/token_info.json';
 $apiClient = new AmoCRMApiClient($clientId, $clientSecret, $redirectUri);
+$apiClient->onAccessTokenRefresh(function ($accessToken) {
+    $tokenData = [
+        'accessToken' => $accessToken->getToken(),
+        'refreshToken' => $accessToken->getRefreshToken(),
+        'expires' => $accessToken->getExpires(),
+        'baseDomain' => $_ENV['CLIENT_BASE_DOMAIN'],
+    ];
+    Token::saveToken(
+        __DIR__.'/../config/token_info.json',
+        $tokenData
+    );
+});
 $apiClient->setAccountBaseDomain($accountBaseDomain);

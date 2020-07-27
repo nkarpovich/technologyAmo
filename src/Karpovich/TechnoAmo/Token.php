@@ -50,7 +50,7 @@ class Token
             }
         }
 
-        try {
+     /*   try {
             $accessToken = $apiClient->getOAuthClient()->getAccessTokenByRefreshToken($accessToken);
             self::saveToken(
                 $pathToTokenFile,
@@ -68,7 +68,7 @@ class Token
             echo $e->getMessage();
             echo $e->getTraceAsString();
             die((string)$e);
-        }
+        }*/
         $apiClient->setAccessToken($accessToken);
     }
 
