@@ -57,7 +57,9 @@ if ($arFiles) {
                         continue;
                     }
 
-                    $leadId = $lead->getId();
+                    if ($lead) {
+                        $leadId = $lead->getId();
+                    }
 
                     if (!$leadId) {
                         $log->info('Лид не найден'.PHP_EOL);
