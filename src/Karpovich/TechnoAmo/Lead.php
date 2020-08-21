@@ -132,6 +132,8 @@ class Lead extends BaseAmoEntity
         'Себестоимость', 'GUID', 'ИДАМО', 'DataPlatezha', 'Summa', 'IDAMO'
     ];
 
+    const PIPELINE_ID__KRASNODAR = 3334905;
+
     /**
      * данные из XML в виде массива. Заполняются при создании объекта класса.
      * @var array
@@ -208,15 +210,15 @@ class Lead extends BaseAmoEntity
             $leadModel = $this->apiClient->leads()->getOne($leadId);
             $this->setLeadObjectData($leadModel);
 
-//            $tagsCollection = $leadModel->getTags();
-//            $tagModel = new TagModel();
-//            $tagModel->setName('Обновлено из 1С');
-//            $tagsCollection->add($tagModel);
+            //            $tagsCollection = $leadModel->getTags();
+            //            $tagModel = new TagModel();
+            //            $tagModel->setName('Обновлено из 1С');
+            //            $tagsCollection->add($tagModel);
             /*$tagsService = $this->apiClient->tags(EntityTypesInterface::LEADS);
             $tagsService->add($tagsCollection);*/
 
             //Добавляем теги
-//            $leadModel->setTags($tagsCollection);
+            //            $leadModel->setTags($tagsCollection);
 
             //Обновляем подготовленный лид
             $this->apiClient->leads()->updateOne($leadModel);
@@ -391,6 +393,10 @@ class Lead extends BaseAmoEntity
                 self::REGION__CHECKBOX__FIELD_ID,
                 $this->dataFromXml['Регион']
             );
+            if( strtolower($this->dataFromXml['Регион'] == 'краснодар')){
+                $leadModel->setPipelineId(self::PIPELINE_ID__KRASNODAR);
+            }
+
         }
         if ($this->dataFromXml['Себестоимость']) {
             $this->setTextCustomField(
