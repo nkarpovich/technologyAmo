@@ -298,7 +298,8 @@ class Lead extends BaseAmoEntity
                     $this->dataFromXml['Телефон'],
                     $this->dataFromXml['Имя'],
                     $this->dataFromXml['ДеньРожденияКлиента'],
-                    $this->dataFromXml['НомерПредъявленнойКартыЛояльности']
+                    $this->dataFromXml['НомерПредъявленнойКартыЛояльности'],
+                    $responsibleUserId
                 );
             }
         }

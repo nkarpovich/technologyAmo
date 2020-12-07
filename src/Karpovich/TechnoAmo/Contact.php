@@ -56,9 +56,11 @@ class Contact extends BaseAmoEntity
      * @param string $name
      * @param string $birthDate
      * @param string $card
+     * @param null $responsibleUserId
      * @return int|null id созданного контакта|null
      */
-    public function create(string $phone, string $name = 'default name', string $birthDate = '', string $card = ''):
+
+    public function create(string $phone, string $name = 'default name', string $birthDate = '', string $card = '', $responsibleUserId = null):
     ?int
     {
         $contact = new ContactModel();
@@ -87,7 +89,9 @@ class Contact extends BaseAmoEntity
             $this->setTextCustomField($contactCustomFieldsValues, self::CARD__FIELD_ID, $card);
         }
         $contact->setCustomFieldsValues($contactCustomFieldsValues);
-
+        if($responsibleUserId){
+            $contact->setResponsibleUserId($responsibleUserId);
+        }
         try {
             $contactModel = $this->apiClient->contacts()->addOne($contact);
         } catch (AmoCRMApiException $e) {
