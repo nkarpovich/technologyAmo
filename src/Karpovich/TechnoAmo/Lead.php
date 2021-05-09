@@ -64,7 +64,7 @@ class Lead extends BaseAmoEntity
     /**
      * Тип и размеры
      */
-    //const TYPE_SIZE__CHECKBOX__FIELD_ID = 267787;
+    const TYPE_SIZE__CHECKBOX__FIELD_ID = 267787;
     /**
      * Комплектация
      */
@@ -324,6 +324,13 @@ class Lead extends BaseAmoEntity
                 $leadCustomFieldsValuesCollection,
                 self::HOUSE_NAME__CHECKBOX__FIELD_ID,
                 $this->dataFromXml['ТипДома']
+            );
+        }
+        if ($this->dataFromXml['Размер']) {
+            $this->setMultiSelectCustomField(
+                $leadCustomFieldsValuesCollection,
+                self::TYPE_SIZE__CHECKBOX__FIELD_ID,
+                $this->dataFromXml['Размер']
             );
         }
         if ($this->dataFromXml['Комплектация']) {
