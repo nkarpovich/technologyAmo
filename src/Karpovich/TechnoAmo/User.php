@@ -31,7 +31,7 @@ class User extends BaseAmoEntity
         }
         if (isset($arUsers)) {
             foreach ($arUsers as $arUser) {
-                if (strtoupper($arUser['email']) === strtoupper($userLogin)) {
+                if (strtoupper($arUser['email']) === strtoupper($userLogin) && $arUser['rights']['is_active']) {
                     $userId = $arUser['id'];
                 }
             }
